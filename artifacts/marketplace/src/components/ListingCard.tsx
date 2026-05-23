@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { MapPin, MessageCircle, Clock, Star } from "lucide-react";
+import { MapPin, Clock, Star } from "lucide-react";
 import type { Listing } from "@workspace/api-client-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -81,17 +81,6 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </div>
         </div>
 
-        {/* WhatsApp button */}
-        <a
-          href={listing.whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="btn-whatsapp mt-3 flex items-center justify-center gap-1.5 w-full py-2 rounded-lg text-sm font-semibold"
-        >
-          <MessageCircle className="w-4 h-4" />
-          Contactar
-        </a>
       </div>
     </div>
   );
