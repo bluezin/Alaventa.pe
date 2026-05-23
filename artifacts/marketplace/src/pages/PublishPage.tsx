@@ -198,7 +198,7 @@ export default function PublishPage() {
           {/* Images */}
           <div className="bg-card rounded-xl border border-card-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Fotos</h2>
-            <p className="text-xs text-muted-foreground mb-3">Agrega URLs de imágenes (máximo 5)</p>
+            <p className="text-xs text-muted-foreground mb-3">Agrega URLs de imágenes (máximo 10)</p>
             <div className="space-y-2">
               {form.imageUrls.map((url, i) => (
                 <div key={i} className="flex items-center gap-2">
@@ -223,7 +223,7 @@ export default function PublishPage() {
                   )}
                 </div>
               ))}
-              {form.imageUrls.length < 5 && (
+              {form.imageUrls.length < 10 && (
                 <button
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, imageUrls: [...f.imageUrls, ""] }))}
