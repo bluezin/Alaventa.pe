@@ -3,20 +3,27 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Marketplace Perú API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: listings
+    description: Listing operations
+  - name: categories
+    description: Category operations
+  - name: users
+    description: User profile operations
+  - name: featured
+    description: Featured listing operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +31,268 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /categories:
+    get:
+      operationId: getCategories
+      tags: [categories]
+      summary: Get all categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /listings:
+    get:
+      operationId: getListings
+      tags: [listings]
+      summary: Get all active listings
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of listings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingsPage"
+    post:
+      operationId: createListing
+      tags: [listings]
+      summary: Create a new listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingInput"
+      responses:
+        "201":
+          description: Created listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /listings/{id}:
+    get:
+      operationId: getListing
+      tags: [listings]
+      summary: Get a listing by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Listing detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateListing
+      tags: [listings]
+      summary: Update a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingUpdate"
+      responses:
+        "200":
+          description: Updated listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+    delete:
+      operationId: deleteListing
+      tags: [listings]
+      summary: Delete a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /listings/{id}/renew:
+    post:
+      operationId: renewListing
+      tags: [listings]
+      summary: Manually renew a listing for another 30 days
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Renewed listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /listings/{id}/feature:
+    post:
+      operationId: featureListing
+      tags: [listings]
+      summary: Mark listing as featured (pay 29 soles)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeatureInput"
+      responses:
+        "200":
+          description: Featured listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /users/me:
+    get:
+      operationId: getMyProfile
+      tags: [users]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+    patch:
+      operationId: updateMyProfile
+      tags: [users]
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfileUpdate"
+      responses:
+        "200":
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users/me/listings:
+    get:
+      operationId: getMyListings
+      tags: [users]
+      summary: Get all listings for the current user
+      responses:
+        "200":
+          description: User's listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
+  /users/{userId}/listings:
+    get:
+      operationId: getUserListings
+      tags: [users]
+      summary: Get all active listings for a user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User's listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
+  /listings/stats/summary:
+    get:
+      operationId: getListingStats
+      tags: [listings]
+      summary: Get marketplace stats (total listings, by category)
+      responses:
+        "200":
+          description: Marketplace stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketplaceStats"
+
+  /listings/expiring-soon:
+    get:
+      operationId: getExpiringListings
+      tags: [listings]
+      summary: Get current user listings expiring within 7 days
+      responses:
+        "200":
+          description: Expiring soon listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +303,188 @@ components:
       required:
         - status
 
+    Category:
+      type: object
+      required: [id, name, slug, icon]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        icon:
+          type: string
+        listingCount:
+          type: integer
+
+    Listing:
+      type: object
+      required: [id, title, description, price, categoryId, categoryName, userId, userPhone, status, expiresAt, createdAt, isFeatured]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: ["number", "null"]
+        currency:
+          type: string
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        userId:
+          type: string
+        userName:
+          type: string
+        userPhone:
+          type: string
+        userAvatarUrl:
+          type: ["string", "null"]
+        imageUrls:
+          type: array
+          items:
+            type: string
+        location:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, expired, deleted]
+        isFeatured:
+          type: boolean
+        featuredUntil:
+          type: ["string", "null"]
+        expiresAt:
+          type: string
+        createdAt:
+          type: string
+        whatsappUrl:
+          type: string
+
+    ListingInput:
+      type: object
+      required: [title, description, categoryId, userPhone]
+      properties:
+        title:
+          type: string
+          minLength: 3
+        description:
+          type: string
+          minLength: 10
+        price:
+          type: ["number", "null"]
+        currency:
+          type: string
+          default: "PEN"
+        categoryId:
+          type: integer
+        userPhone:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+        location:
+          type: string
+
+    ListingUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: ["number", "null"]
+        categoryId:
+          type: integer
+        userPhone:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+        location:
+          type: string
+
+    ListingsPage:
+      type: object
+      required: [listings, total, page, limit]
+      properties:
+        listings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Listing"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        hasMore:
+          type: boolean
+
+    FeatureInput:
+      type: object
+      required: [paymentReference]
+      properties:
+        paymentReference:
+          type: string
+
+    UserProfile:
+      type: object
+      required: [id, clerkId, name, email, createdAt]
+      properties:
+        id:
+          type: integer
+        clerkId:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        activeListingsCount:
+          type: integer
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        avatarUrl:
+          type: string
+
+    MarketplaceStats:
+      type: object
+      required: [totalListings, featuredListings, categoryCounts]
+      properties:
+        totalListings:
+          type: integer
+        featuredListings:
+          type: integer
+        categoryCounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryCount"
+
+    CategoryCount:
+      type: object
+      required: [categoryId, categoryName, count]
+      properties:
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        count:
+          type: integer
