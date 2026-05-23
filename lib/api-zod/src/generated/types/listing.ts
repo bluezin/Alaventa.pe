@@ -16,6 +16,7 @@ export interface Listing {
   currency?: string;
   categoryId: number;
   categoryName: string;
+  categorySlug?: string;
   userId: string;
   userName?: string;
   userPhone: string;

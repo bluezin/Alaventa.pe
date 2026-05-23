@@ -47,8 +47,8 @@ export default function ListingDetailPage() {
   const [copied, setCopied] = useState(false);
 
   const { data: relatedData } = useGetListings(
-    { category: listing?.categoryId?.toString(), limit: 5 },
-    { query: { enabled: !!listing?.categoryId } }
+    { category: listing?.categorySlug, limit: 5 },
+    { query: { enabled: !!listing?.categorySlug } }
   );
   const relatedListings = (relatedData?.listings ?? []).filter(
     (l) => l.id !== id

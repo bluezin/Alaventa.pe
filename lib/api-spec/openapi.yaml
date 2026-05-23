@@ -336,6 +336,8 @@ components:
           type: integer
         categoryName:
           type: string
+        categorySlug:
+          type: string
         userId:
           type: string
         userName:

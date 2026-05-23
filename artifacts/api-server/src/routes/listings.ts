@@ -16,7 +16,8 @@ async function enrichListings(listings: any[]) {
   }
   const categories = await db.select().from(categoriesTable);
   const catMap: Record<number, string> = {};
-  for (const c of categories) catMap[c.id] = c.name;
+  const slugMap: Record<number, string> = {};
+  for (const c of categories) { catMap[c.id] = c.name; slugMap[c.id] = c.slug; }
 
   return listings.map((l) => {
     const user = users[l.userId];
@@ -26,6 +27,7 @@ async function enrichListings(listings: any[]) {
       ...l,
       price: l.price != null ? Number(l.price) : null,
       categoryName: catMap[l.categoryId] ?? "Otros",
+      categorySlug: slugMap[l.categoryId] ?? "",
       userName: user?.name ?? "Vendedor",
       userAvatarUrl: user?.avatarUrl ?? null,
       whatsappUrl: `https://wa.me/${waPhone}?text=Hola%2C+vi+tu+publicaci%C3%B3n+%22${encodeURIComponent(l.title)}%22+en+Mercado+Per%C3%BA+y+me+interesa.`,
