@@ -111,7 +111,7 @@ export default function PublishPage() {
           <div className="bg-card rounded-xl border border-card-border p-5">
             <h2 className="font-semibold text-foreground mb-3">Categoría *</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {(categories ?? []).map((cat) => (
+              {(categories ?? [])?.map?.((cat) => (
                 <button
                   key={cat.id}
                   type="button"

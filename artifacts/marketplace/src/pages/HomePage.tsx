@@ -29,18 +29,18 @@ export default function HomePage() {
       <Navbar onSearch={handleSearch} />
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-primary to-orange-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-10">
+      <div className="bg-gradient-to-br from-primary to-indigo-950 text-white flex items-center justify-center py-10 gap-20">
+        <div>
           <div className="max-w-2xl">
             <h1 className="text-3xl md:text-4xl font-bold mb-2 leading-tight">
               Compra y vende en todo el Perú
             </h1>
-            <p className="text-orange-100 text-base mb-6">
+            <p className="text-indigo-100/90 text-base mb-6">
               Miles de anuncios de particulares y tiendas. Gratis, rápido y seguro.
             </p>
             <button
               onClick={() => navigate("/publish")}
-              className="inline-flex items-center gap-2 bg-white text-primary font-bold px-6 py-3 rounded-full hover:bg-orange-50 transition-colors shadow-lg"
+              className="inline-flex cursor-pointer items-center gap-2 bg-accent text-accent-foreground font-bold px-6 py-3 rounded-full hover:brightness-110 transition shadow-lg"
             >
               Publicar gratis <ArrowRight className="w-4 h-4" />
             </button>
@@ -48,22 +48,24 @@ export default function HomePage() {
 
           {/* Stats */}
           {stats && (
-            <div className="flex gap-6 mt-8">
+            <div className="flex gap-8 mt-8">
               <div className="text-center">
-                <p className="text-2xl font-bold">{stats.totalListings.toLocaleString("es-PE")}</p>
-                <p className="text-orange-200 text-sm">Anuncios activos</p>
+                <p className="text-2xl font-bold">{stats.totalListings?.toLocaleString("es-PE")}</p>
+                <p className="text-indigo-200/80 text-sm">Anuncios activos</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold">{stats.featuredListings.toLocaleString("es-PE")}</p>
-                <p className="text-orange-200 text-sm">Destacados</p>
+                <p className="text-2xl font-bold">{stats.featuredListings?.toLocaleString("es-PE")}</p>
+                <p className="text-indigo-200/80 text-sm">Destacados</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold">{catList.length}</p>
-                <p className="text-orange-200 text-sm">Categorías</p>
+                <p className="text-indigo-200/80 text-sm">Categorías</p>
               </div>
             </div>
           )}
         </div>
+
+        <img src={"/image-main.png"} width={500} />
       </div>
 
       {/* Ad banner */}
@@ -116,7 +118,7 @@ export default function HomePage() {
                   : "Todos los anuncios"}
                 {listingsPage && (
                   <span className="ml-2 text-sm text-muted-foreground font-normal">
-                    ({listingsPage.total.toLocaleString("es-PE")})
+                    ({listingsPage.total?.toLocaleString("es-PE")})
                   </span>
                 )}
               </h2>

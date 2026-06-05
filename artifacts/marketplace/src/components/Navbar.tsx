@@ -31,7 +31,9 @@ export default function Navbar({ onSearch, initialSearch = "" }: NavbarProps) {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <ShoppingBag className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-lg text-primary hidden sm:block">Mercado Perú</span>
+            <span className="font-bold text-lg text-primary hidden sm:block">
+              Mercado Perú
+            </span>
           </Link>
 
           {/* Search */}
@@ -64,7 +66,17 @@ export default function Navbar({ onSearch, initialSearch = "" }: NavbarProps) {
               >
                 Mi cuenta
               </Link>
-              <UserButton afterSignOutUrl="/" />
+
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    userButtonPopoverActionButton__manageAccount: {
+                      display: "none",
+                    },
+                  },
+                }}
+              />
             </Show>
             <Show when="signed-out">
               <Link
@@ -74,7 +86,10 @@ export default function Navbar({ onSearch, initialSearch = "" }: NavbarProps) {
                 <Plus className="w-4 h-4" />
                 Publicar gratis
               </Link>
-              <Link href="/sign-in" className="px-3 py-2 text-sm text-foreground hover:text-primary transition-colors">
+              <Link
+                href="/sign-in"
+                className="px-3 py-2 text-sm text-foreground hover:text-primary transition-colors"
+              >
                 Ingresar
               </Link>
               <Link
@@ -91,7 +106,11 @@ export default function Navbar({ onSearch, initialSearch = "" }: NavbarProps) {
             className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         </div>
       </div>
@@ -115,7 +134,16 @@ export default function Navbar({ onSearch, initialSearch = "" }: NavbarProps) {
               Mi cuenta
             </Link>
             <div className="flex justify-center">
-              <UserButton afterSignOutUrl="/" />
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    userButtonPopoverActionButton__manageAccount: {
+                      display: "none",
+                    },
+                  },
+                }}
+              />
             </div>
           </Show>
           <Show when="signed-out">

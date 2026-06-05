@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, listingsTable, categoriesTable, usersTable } from "@workspace/db";
-import { eq, and, or, like, desc, asc, sql, count, lte, gte } from "drizzle-orm";
+import { eq, and, or, ilike, desc, asc, sql, count, lte, gte } from "drizzle-orm";
 import { requireAuth, optionalAuth } from "../middlewares/auth";
 import { CreateListingBody, UpdateListingBody, FeatureListingBody } from "@workspace/api-zod";
 
@@ -57,7 +57,10 @@ router.get("/", optionalAuth, async (req, res) => {
 
     const conditions: any[] = [eq(listingsTable.status, "active")];
     if (category) conditions.push(eq(categoriesTable.slug, category));
-    if (search) conditions.push(like(listingsTable.title, `%${search}%`));
+    if (search) {
+      const term = `%${search}%`;
+      conditions.push(or(ilike(listingsTable.title, term), ilike(listingsTable.description, term))!);
+    }
     if (featured === "true") conditions.push(eq(listingsTable.isFeatured, true));
 
     const baseQuery = db
@@ -118,7 +121,7 @@ router.get("/stats/summary", async (req, res) => {
       .where(and(eq(listingsTable.status, "active"), eq(listingsTable.isFeatured, true)));
     const categories = await db.select().from(categoriesTable);
     const categoryCounts = await Promise.all(
-      categories.map(async (c) => {
+      categories?.map(async (c) => {
         const [{ cnt }] = await db
           .select({ cnt: count() })
           .from(listingsTable)
@@ -224,7 +227,7 @@ router.post("/", requireAuth, async (req, res) => {
 router.patch("/:id", requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId as string;
-    const id = parseInt(req.params.id);
+    const id = parseInt(`${req?.params?.id}`);
     const parsed = UpdateListingBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: "Invalid request" });
@@ -257,7 +260,7 @@ router.patch("/:id", requireAuth, async (req, res) => {
 router.delete("/:id", requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId as string;
-    const id = parseInt(req.params.id);
+    const id = parseInt(`${req.params.id}`);
     const rows = await db.select().from(listingsTable).where(and(eq(listingsTable.id, id), eq(listingsTable.userId, userId))).limit(1);
     if (rows.length === 0) {
       res.status(404).json({ error: "Not found or unauthorized" });
@@ -275,7 +278,7 @@ router.delete("/:id", requireAuth, async (req, res) => {
 router.post("/:id/renew", requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId as string;
-    const id = parseInt(req.params.id);
+    const id = parseInt(`${req.params.id}`);
     const rows = await db.select().from(listingsTable).where(and(eq(listingsTable.id, id), eq(listingsTable.userId, userId))).limit(1);
     if (rows.length === 0) {
       res.status(404).json({ error: "Not found or unauthorized" });
@@ -306,7 +309,7 @@ router.post("/:id/renew", requireAuth, async (req, res) => {
 router.post("/:id/feature", requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId as string;
-    const id = parseInt(req.params.id);
+    const id = parseInt(`${req.params.id}`);
     const parsed = FeatureListingBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: "Invalid request" });

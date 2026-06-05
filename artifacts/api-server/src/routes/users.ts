@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db, usersTable, listingsTable } from "@workspace/db";
 import { eq, and, count } from "drizzle-orm";
+import { clerkClient } from "@clerk/express";
 import { requireAuth } from "../middlewares/auth";
 import { UpdateMyProfileBody } from "@workspace/api-zod";
 
@@ -21,15 +22,25 @@ async function ensureUser(clerkId: string, name: string, email: string, avatarUr
   return existing[0];
 }
 
+// Auto-create the local user record from Clerk data on first /me hit, so the
+// frontend doesn't need to explicitly call the sync endpoint after login.
+async function getOrCreateMe(clerkId: string) {
+  const existing = await db.select().from(usersTable).where(eq(usersTable.clerkId, clerkId)).limit(1);
+  if (existing.length > 0) return existing[0];
+
+  const clerkUser = await clerkClient.users.getUser(clerkId);
+  const primaryEmail =
+    clerkUser.emailAddresses.find((e) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+    clerkUser.emailAddresses[0]?.emailAddress ??
+    "";
+  const fullName = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ").trim();
+  return ensureUser(clerkId, fullName || clerkUser.username || "Usuario", primaryEmail, clerkUser.imageUrl);
+}
+
 router.get("/me", requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId as string;
-    const users = await db.select().from(usersTable).where(eq(usersTable.clerkId, userId)).limit(1);
-    if (users.length === 0) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
-    const user = users[0];
+    const user = await getOrCreateMe(userId);
     const [{ value: activeCount }] = await db
       .select({ value: count() })
       .from(listingsTable)
@@ -49,16 +60,13 @@ router.patch("/me", requireAuth, async (req, res) => {
       res.status(400).json({ error: "Invalid request", details: parsed.error });
       return;
     }
+    await getOrCreateMe(userId);
     const { name, phone, avatarUrl } = parsed.data;
     const updates: Record<string, unknown> = {};
     if (name !== undefined) updates.name = name;
     if (phone !== undefined) updates.phone = phone;
     if (avatarUrl !== undefined) updates.avatarUrl = avatarUrl;
     const [updated] = await db.update(usersTable).set(updates).where(eq(usersTable.clerkId, userId)).returning();
-    if (!updated) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
     const [{ value: activeCount }] = await db
       .select({ value: count() })
       .from(listingsTable)

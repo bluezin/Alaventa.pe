@@ -72,28 +72,28 @@
   --sidebar: 0 0% 100%;
   --sidebar-foreground: 220 20% 14%;
   --sidebar-border: 220 13% 88%;
-  --sidebar-primary: 25 95% 53%;
+  --sidebar-primary: 241 65% 22%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 25 95% 97%;
-  --sidebar-accent-foreground: 220 20% 14%;
-  --sidebar-accent-border: 25 95% 90%;
-  --sidebar-ring: 25 95% 53%;
+  --sidebar-accent: 241 65% 96%;
+  --sidebar-accent-foreground: 241 65% 22%;
+  --sidebar-accent-border: 241 40% 88%;
+  --sidebar-ring: 241 65% 22%;
   --popover: 0 0% 100%;
   --popover-foreground: 220 20% 14%;
   --popover-border: 220 13% 88%;
-  --primary: 25 95% 53%;
+  --primary: 241 65% 22%;
   --primary-foreground: 0 0% 100%;
   --secondary: 220 13% 93%;
   --secondary-foreground: 220 20% 14%;
   --muted: 220 13% 93%;
   --muted-foreground: 220 9% 46%;
-  --accent: 25 95% 97%;
-  --accent-foreground: 25 95% 40%;
+  --accent: 25 95% 53%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
   --input: 220 13% 85%;
-  --ring: 25 95% 53%;
-  --chart-1: 25 95% 53%;
+  --ring: 241 65% 22%;
+  --chart-1: 241 65% 22%;
   --chart-2: 220 70% 50%;
   --chart-3: 160 60% 45%;
   --chart-4: 45 90% 55%;
@@ -141,27 +141,27 @@
   --sidebar: 220 18% 12%;
   --sidebar-foreground: 220 10% 90%;
   --sidebar-border: 220 15% 20%;
-  --sidebar-primary: 25 95% 55%;
+  --sidebar-primary: 241 70% 60%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 25 50% 18%;
-  --sidebar-accent-foreground: 25 95% 80%;
-  --sidebar-ring: 25 95% 55%;
+  --sidebar-accent: 241 40% 22%;
+  --sidebar-accent-foreground: 241 80% 85%;
+  --sidebar-ring: 241 70% 60%;
   --popover: 220 18% 13%;
   --popover-foreground: 220 10% 94%;
   --popover-border: 220 15% 20%;
-  --primary: 25 95% 55%;
+  --primary: 241 70% 60%;
   --primary-foreground: 0 0% 100%;
   --secondary: 220 15% 20%;
   --secondary-foreground: 220 10% 90%;
   --muted: 220 15% 18%;
   --muted-foreground: 220 9% 60%;
-  --accent: 25 50% 18%;
-  --accent-foreground: 25 95% 75%;
+  --accent: 25 95% 55%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
   --input: 220 15% 22%;
-  --ring: 25 95% 55%;
-  --chart-1: 25 95% 55%;
+  --ring: 241 70% 60%;
+  --chart-1: 241 70% 60%;
   --chart-2: 220 70% 60%;
   --chart-3: 160 60% 50%;
   --chart-4: 45 90% 60%;
@@ -261,8 +261,27 @@
   transition: background 0.15s, color 0.15s;
 }
 .category-item.active, .category-item:hover {
-  background: hsl(25 95% 97%);
-  color: hsl(25 95% 40%);
+  background: hsl(241 65% 96%);
+  color: hsl(241 65% 22%);
+}
+
+/* Force visibility on Clerk user-button popover menu items
+   (the shadcn theme reduces opacity which makes them hard to read) */
+.cl-userButtonPopoverActionButtonText,
+.cl-userButtonPopoverActionButtonIcon,
+.cl-userPreviewMainIdentifier,
+.cl-userPreviewSecondaryIdentifier {
+  opacity: 1 !important;
+}
+.cl-userButtonPopoverActionButtonText,
+.cl-userPreviewMainIdentifier {
+  color: hsl(var(--foreground)) !important;
+}
+.cl-userButtonPopoverActionButtonIcon {
+  color: hsl(var(--foreground)) !important;
+}
+.cl-userPreviewSecondaryIdentifier {
+  color: hsl(var(--muted-foreground)) !important;
 }
 
 /* Ad placeholder */

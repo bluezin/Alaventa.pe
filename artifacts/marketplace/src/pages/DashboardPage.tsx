@@ -2,15 +2,38 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth, useUser } from "@clerk/react";
 import {
-  useGetMyProfile, useGetMyListings, useGetExpiringListings,
-  useUpdateMyProfile, useRenewListing, useDeleteListing, useFeatureListing, useUpdateListing,
-  getGetMyProfileQueryKey, getGetMyListingsQueryKey, getGetExpiringListingsQueryKey, getGetListingsQueryKey,
+  useGetMyProfile,
+  useGetMyListings,
+  useGetExpiringListings,
+  useUpdateMyProfile,
+  useRenewListing,
+  useDeleteListing,
+  useFeatureListing,
+  useUpdateListing,
+  getGetMyProfileQueryKey,
+  getGetMyListingsQueryKey,
+  getGetExpiringListingsQueryKey,
+  getGetListingsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "../components/Navbar";
 import {
-  User, Phone, Edit3, Check, X, AlertTriangle, Clock, Star,
-  Trash2, RefreshCw, Plus, Package, Image, FileText, ChevronDown, ChevronUp
+  User,
+  Phone,
+  Edit3,
+  Check,
+  X,
+  AlertTriangle,
+  Clock,
+  Star,
+  Trash2,
+  RefreshCw,
+  Plus,
+  Package,
+  Image,
+  FileText,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
@@ -19,7 +42,9 @@ import type { Listing } from "@workspace/api-client-react";
 interface EditState {
   listingId: number;
   description: string;
+  title: string;
   imageUrls: string[];
+  price: number;
 }
 
 export default function DashboardPage() {
@@ -28,9 +53,15 @@ export default function DashboardPage() {
   const [, navigate] = useLocation();
   const qc = useQueryClient();
 
-  const { data: profile, isLoading: profileLoading } = useGetMyProfile({ query: { enabled: isSignedIn } });
-  const { data: myListings } = useGetMyListings({ query: { enabled: isSignedIn } });
-  const { data: expiringListings } = useGetExpiringListings({ query: { enabled: isSignedIn } });
+  const { data: profile, isLoading: profileLoading } = useGetMyProfile({
+    query: { enabled: isSignedIn },
+  });
+  const { data: myListings } = useGetMyListings({
+    query: { enabled: isSignedIn },
+  });
+  const { data: expiringListings } = useGetExpiringListings({
+    query: { enabled: isSignedIn },
+  });
   const updateProfile = useUpdateMyProfile();
   const renewListing = useRenewListing();
   const deleteListing = useDeleteListing();
@@ -52,9 +83,16 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="max-w-lg mx-auto px-4 py-20 text-center">
-          <p className="text-xl font-bold text-foreground mb-2">Inicia sesión</p>
-          <p className="text-muted-foreground text-sm mb-6">Para ver tu panel necesitas iniciar sesión</p>
-          <a href="/sign-in" className="inline-block px-6 py-3 rounded-full bg-primary text-primary-foreground font-bold hover:opacity-90">
+          <p className="text-xl font-bold text-foreground mb-2">
+            Inicia sesión
+          </p>
+          <p className="text-muted-foreground text-sm mb-6">
+            Para ver tu panel necesitas iniciar sesión
+          </p>
+          <a
+            href="/sign-in"
+            className="inline-block px-6 py-3 rounded-full bg-primary text-primary-foreground font-bold hover:opacity-90"
+          >
             Iniciar sesión
           </a>
         </div>
@@ -70,7 +108,9 @@ export default function DashboardPage() {
 
   async function saveProfile() {
     try {
-      await updateProfile.mutateAsync({ data: { name: nameEdit, phone: phoneEdit } });
+      await updateProfile.mutateAsync({
+        data: { name: nameEdit, phone: phoneEdit },
+      });
       qc.invalidateQueries({ queryKey: getGetMyProfileQueryKey() });
       setEditingProfile(false);
     } catch {}
@@ -82,7 +122,10 @@ export default function DashboardPage() {
       await renewListing.mutateAsync({ id });
       qc.invalidateQueries({ queryKey: getGetMyListingsQueryKey() });
       qc.invalidateQueries({ queryKey: getGetExpiringListingsQueryKey() });
-    } catch {} finally { setActionLoading(null); }
+    } catch {
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function handleDelete(id: number) {
@@ -92,22 +135,36 @@ export default function DashboardPage() {
       await deleteListing.mutateAsync({ id });
       qc.invalidateQueries({ queryKey: getGetMyListingsQueryKey() });
       qc.invalidateQueries({ queryKey: getGetListingsQueryKey() });
-    } catch {} finally { setActionLoading(null); }
+    } catch {
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function handleFeature(id: number) {
-    if (!confirm("Destacar este anuncio por S/ 29 soles por 30 días. ¿Continuar?")) return;
+    if (
+      !confirm("Destacar este anuncio por S/ 29 soles por 30 días. ¿Continuar?")
+    )
+      return;
     setActionLoading(id);
     try {
-      await featureListing.mutateAsync({ id, data: { paymentReference: `PAY_${Date.now()}` } });
+      await featureListing.mutateAsync({
+        id,
+        data: { paymentReference: `PAY_${Date.now()}` },
+      });
       qc.invalidateQueries({ queryKey: getGetMyListingsQueryKey() });
-    } catch {} finally { setActionLoading(null); }
+    } catch {
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   function startEditListing(listing: Listing) {
     setEditState({
+      title: listing.title,
       listingId: listing.id,
       description: listing.description ?? "",
+      price: listing.price || 0,
       imageUrls: listing.imageUrls?.length ? [...listing.imageUrls] : [""],
     });
     setEditError("");
@@ -130,7 +187,12 @@ export default function DashboardPage() {
       const imageUrls = editState.imageUrls.filter(Boolean);
       await updateListing.mutateAsync({
         id: editState.listingId,
-        data: { description: editState.description.trim(), imageUrls },
+        data: {
+          description: editState.description.trim(),
+          imageUrls,
+          title: editState.title,
+          price: editState.price,
+        },
       });
       qc.invalidateQueries({ queryKey: getGetMyListingsQueryKey() });
       qc.invalidateQueries({ queryKey: getGetListingsQueryKey() });
@@ -156,11 +218,18 @@ export default function DashboardPage() {
 
   function removeEditUrl(i: number) {
     if (!editState) return;
-    setEditState({ ...editState, imageUrls: editState.imageUrls.filter((_, j) => j !== i) });
+    setEditState({
+      ...editState,
+      imageUrls: editState.imageUrls.filter((_, j) => j !== i),
+    });
   }
 
-  const activeListings = (myListings ?? []).filter((l) => l.status === "active");
-  const expiredListings = (myListings ?? []).filter((l) => l.status === "expired");
+  const activeListings = (myListings ?? []).filter(
+    (l) => l.status === "active",
+  );
+  const expiredListings = (myListings ?? []).filter(
+    (l) => l.status === "expired",
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -182,9 +251,15 @@ export default function DashboardPage() {
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold text-amber-800 text-sm">
-                Tienes {expiringListings!.length} {expiringListings!.length === 1 ? "anuncio que vence" : "anuncios que vencen"} pronto
+                Tienes {expiringListings!.length}{" "}
+                {expiringListings!.length === 1
+                  ? "anuncio que vence"
+                  : "anuncios que vencen"}{" "}
+                pronto
               </p>
-              <p className="text-amber-700 text-xs mt-0.5">Renúevalos antes de que venzan.</p>
+              <p className="text-amber-700 text-xs mt-0.5">
+                Renúevalos antes de que venzan.
+              </p>
             </div>
           </div>
         )}
@@ -205,13 +280,17 @@ export default function DashboardPage() {
                     <User className="w-10 h-10 text-primary" />
                   </div>
                 )}
-                <p className="text-xs text-muted-foreground mt-2">Foto de perfil de Google/Facebook</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Foto de perfil de Google/Facebook
+                </p>
               </div>
 
               {editingProfile ? (
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-medium text-foreground">Nombre</label>
+                    <label className="text-xs font-medium text-foreground">
+                      Nombre
+                    </label>
                     <input
                       value={nameEdit}
                       onChange={(e) => setNameEdit(e.target.value)}
@@ -219,7 +298,9 @@ export default function DashboardPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-foreground">Celular</label>
+                    <label className="text-xs font-medium text-foreground">
+                      Celular
+                    </label>
                     <input
                       value={phoneEdit}
                       onChange={(e) => setPhoneEdit(e.target.value)}
@@ -233,9 +314,18 @@ export default function DashboardPage() {
                       disabled={updateProfile.isPending}
                       className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
                     >
-                      <Check className="w-3.5 h-3.5" /> Guardar
+                      {updateProfile.isPending ? (
+                        "Cargando ..."
+                      ) : (
+                        <>
+                          <Check className="w-3.5 h-3.5" /> Guardar
+                        </>
+                      )}
                     </button>
-                    <button onClick={() => setEditingProfile(false)} className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg border border-border text-sm">
+                    <button
+                      onClick={() => setEditingProfile(false)}
+                      className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg border border-border text-sm"
+                    >
                       <X className="w-3.5 h-3.5" /> Cancelar
                     </button>
                   </div>
@@ -244,11 +334,17 @@ export default function DashboardPage() {
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs text-muted-foreground">Nombre</p>
-                    <p className="font-semibold text-foreground text-sm">{profile?.name ?? clerkUser?.fullName ?? "—"}</p>
+                    <p className="font-semibold text-foreground text-sm">
+                      {profile?.name ?? clerkUser?.fullName ?? "—"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="font-medium text-foreground text-sm truncate">{profile?.email ?? clerkUser?.primaryEmailAddress?.emailAddress ?? "—"}</p>
+                    <p className="font-medium text-foreground text-sm truncate">
+                      {profile?.email ??
+                        clerkUser?.primaryEmailAddress?.emailAddress ??
+                        "—"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Celular</p>
@@ -268,19 +364,33 @@ export default function DashboardPage() {
             </div>
 
             <div className="bg-card rounded-xl border border-card-border p-5">
-              <h3 className="font-semibold text-foreground text-sm mb-3">Estadísticas</h3>
+              <h3 className="font-semibold text-foreground text-sm mb-3">
+                Estadísticas
+              </h3>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Anuncios activos</span>
-                  <span className="font-bold text-primary">{activeListings.length}</span>
+                  <span className="text-sm text-muted-foreground">
+                    Anuncios activos
+                  </span>
+                  <span className="font-bold text-primary">
+                    {activeListings.length}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Vencidos</span>
-                  <span className="font-bold text-muted-foreground">{expiredListings.length}</span>
+                  <span className="text-sm text-muted-foreground">
+                    Vencidos
+                  </span>
+                  <span className="font-bold text-muted-foreground">
+                    {expiredListings.length}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Por vencer (7 días)</span>
-                  <span className="font-bold text-amber-600">{(expiringListings ?? []).length}</span>
+                  <span className="text-sm text-muted-foreground">
+                    Por vencer (7 días)
+                  </span>
+                  <span className="font-bold text-amber-600">
+                    {(expiringListings ?? []).length}
+                  </span>
                 </div>
               </div>
             </div>
@@ -291,7 +401,10 @@ export default function DashboardPage() {
             {profileLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-card rounded-xl border border-card-border p-4 animate-pulse">
+                  <div
+                    key={i}
+                    className="bg-card rounded-xl border border-card-border p-4 animate-pulse"
+                  >
                     <div className="flex gap-3">
                       <div className="w-20 h-20 bg-muted rounded-lg shrink-0" />
                       <div className="flex-1 space-y-2">
@@ -305,36 +418,60 @@ export default function DashboardPage() {
             ) : (myListings ?? []).length === 0 ? (
               <div className="bg-card rounded-xl border border-card-border p-10 text-center">
                 <Package className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="font-semibold text-foreground mb-1">Aún no tienes anuncios</p>
-                <p className="text-sm text-muted-foreground mb-5">Publica tu primer anuncio gratis</p>
-                <button onClick={() => navigate("/publish")} className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold hover:opacity-90">
+                <p className="font-semibold text-foreground mb-1">
+                  Aún no tienes anuncios
+                </p>
+                <p className="text-sm text-muted-foreground mb-5">
+                  Publica tu primer anuncio gratis
+                </p>
+                <button
+                  onClick={() => navigate("/publish")}
+                  className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold hover:opacity-90"
+                >
                   Publicar ahora
                 </button>
               </div>
             ) : (
               <div className="space-y-3">
                 {(myListings ?? []).map((listing) => {
-                  const expiry = listing.expiresAt ? new Date(listing.expiresAt) : null;
-                  const daysLeft = expiry ? differenceInDays(expiry, new Date()) : null;
-                  const isExpiring = daysLeft !== null && daysLeft <= 7 && listing.status === "active";
+                  const expiry = listing.expiresAt
+                    ? new Date(listing.expiresAt)
+                    : null;
+                  const daysLeft = expiry
+                    ? differenceInDays(expiry, new Date())
+                    : null;
+                  const isExpiring =
+                    daysLeft !== null &&
+                    daysLeft <= 7 &&
+                    listing.status === "active";
                   const isExpired = listing.status === "expired";
                   const loading = actionLoading === listing.id;
                   const isEditing = editState?.listingId === listing.id;
 
                   return (
-                    <div key={listing.id} className={`bg-card rounded-xl border transition-all ${
-                      isEditing ? "border-primary/50 ring-2 ring-primary/10" :
-                      isExpiring ? "border-amber-300 bg-amber-50/50" :
-                      isExpired ? "border-destructive/20 opacity-75" :
-                      "border-card-border"
-                    }`}>
+                    <div
+                      key={listing.id}
+                      className={`bg-card rounded-xl border transition-all ${
+                        isEditing
+                          ? "border-primary/50 ring-2 ring-primary/10"
+                          : isExpiring
+                            ? "border-amber-300 bg-amber-50/50"
+                            : isExpired
+                              ? "border-destructive/20 opacity-75"
+                              : "border-card-border"
+                      }`}
+                    >
                       {/* Listing header row */}
                       <div className="p-4">
                         <div className="flex gap-3">
                           <Link href={`/listings/${listing.id}`}>
                             <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0">
                               {listing.imageUrls?.[0] ? (
-                                <img src={listing.imageUrls[0]} alt={listing.title} className="w-full h-full object-cover" />
+                                <img
+                                  src={listing.imageUrls[0]}
+                                  alt={listing.title}
+                                  className="w-full h-full object-cover"
+                                />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
                                   <Package className="w-8 h-8" />
@@ -353,24 +490,37 @@ export default function DashboardPage() {
                               <div className="flex items-center gap-1 shrink-0">
                                 {listing.isFeatured && (
                                   <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-full">
-                                    <Star className="w-2.5 h-2.5 fill-amber-600" /> Destacado
+                                    <Star className="w-2.5 h-2.5 fill-amber-600" />{" "}
+                                    Destacado
                                   </span>
                                 )}
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                                  isExpired ? "bg-red-100 text-red-600" :
-                                  isExpiring ? "bg-amber-100 text-amber-700" :
-                                  "bg-green-100 text-green-700"
-                                }`}>
-                                  {isExpired ? "Vencido" : isExpiring ? `Vence en ${daysLeft}d` : "Activo"}
+                                <span
+                                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                                    isExpired
+                                      ? "bg-red-100 text-red-600"
+                                      : isExpiring
+                                        ? "bg-amber-100 text-amber-700"
+                                        : "bg-green-100 text-green-700"
+                                  }`}
+                                >
+                                  {isExpired
+                                    ? "Vencido"
+                                    : isExpiring
+                                      ? `Vence en ${daysLeft}d`
+                                      : "Activo"}
                                 </span>
                               </div>
                             </div>
                             <p className="font-bold text-primary text-sm mt-1">
-                              {listing.price != null ? `S/ ${Number(listing.price).toLocaleString("es-PE")}` : "A convenir"}
+                              {listing.price != null
+                                ? `S/ ${Number(listing.price).toLocaleString("es-PE")}`
+                                : "A convenir"}
                             </p>
                             <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                               <Clock className="w-3 h-3" />
-                              {expiry ? format(expiry, "d MMM yyyy", { locale: es }) : "—"}
+                              {expiry
+                                ? format(expiry, "d MMM yyyy", { locale: es })
+                                : "—"}
                             </div>
                           </div>
                         </div>
@@ -379,14 +529,22 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border flex-wrap">
                           {/* Edit button */}
                           <button
-                            onClick={() => isEditing ? cancelEditListing() : startEditListing(listing)}
+                            onClick={() =>
+                              isEditing
+                                ? cancelEditListing()
+                                : startEditListing(listing)
+                            }
                             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
                               isEditing
                                 ? "border-primary/40 bg-accent text-primary"
                                 : "border-border text-foreground hover:bg-muted"
                             }`}
                           >
-                            {isEditing ? <ChevronUp className="w-3 h-3" /> : <Edit3 className="w-3 h-3" />}
+                            {isEditing ? (
+                              <ChevronUp className="w-3 h-3" />
+                            ) : (
+                              <Edit3 className="w-3 h-3" />
+                            )}
                             {isEditing ? "Cerrar" : "Editar"}
                           </button>
 
@@ -399,15 +557,16 @@ export default function DashboardPage() {
                               <RefreshCw className="w-3 h-3" /> Renovar (gratis)
                             </button>
                           )}
-                          {!listing.isFeatured && listing.status === "active" && (
-                            <button
-                              onClick={() => handleFeature(listing.id)}
-                              disabled={loading}
-                              className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-amber-400 text-amber-700 text-xs font-semibold hover:bg-amber-50 disabled:opacity-60"
-                            >
-                              <Star className="w-3 h-3" /> Destacar S/ 29
-                            </button>
-                          )}
+                          {!listing.isFeatured &&
+                            listing.status === "active" && (
+                              <button
+                                onClick={() => handleFeature(listing.id)}
+                                disabled={loading}
+                                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-amber-400 text-amber-700 text-xs font-semibold hover:bg-amber-50 disabled:opacity-60"
+                              >
+                                <Star className="w-3 h-3" /> Destacar S/ 29
+                              </button>
+                            )}
                           <button
                             onClick={() => handleDelete(listing.id)}
                             disabled={loading}
@@ -421,8 +580,52 @@ export default function DashboardPage() {
                       {/* Inline edit panel */}
                       {isEditing && editState && (
                         <div className="border-t border-border bg-muted/30 p-4 space-y-4 rounded-b-xl">
-                          <h4 className="font-semibold text-foreground text-sm">Editar anuncio</h4>
+                          <h4 className="font-semibold text-foreground text-sm">
+                            Editar anuncio
+                          </h4>
 
+                          {/* Titulo */}
+                          <div>
+                            <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
+                              <FileText className="w-3.5 h-3.5" /> Titulo
+                            </label>
+                            <input
+                              value={editState.title}
+                              onChange={(e) =>
+                                setEditState({
+                                  ...editState,
+                                  title: e.target.value,
+                                })
+                              }
+                              maxLength={50}
+                              className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {editState.description.length}/50
+                            </p>
+                          </div>
+                          {/* Precio */}
+                          <div>
+                            <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
+                              <FileText className="w-3.5 h-3.5" /> Precio
+                            </label>
+                            <input
+                              value={editState.price}
+                              min="0"
+                              step="0.01"
+                              onChange={(e) =>
+                                setEditState({
+                                  ...editState,
+                                  price: Number(e.target.value),
+                                })
+                              }
+                              type="number"
+                              className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {editState.description.length}/50
+                            </p>
+                          </div>
                           {/* Description */}
                           <div>
                             <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
@@ -430,35 +633,52 @@ export default function DashboardPage() {
                             </label>
                             <textarea
                               value={editState.description}
-                              onChange={(e) => setEditState({ ...editState, description: e.target.value })}
+                              onChange={(e) =>
+                                setEditState({
+                                  ...editState,
+                                  description: e.target.value,
+                                })
+                              }
                               rows={5}
                               maxLength={2000}
                               className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
                             />
-                            <p className="text-xs text-muted-foreground mt-1">{editState.description.length}/2000</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {editState.description.length}/2000
+                            </p>
                           </div>
 
                           {/* Photos */}
                           <div>
                             <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
-                              <Image className="w-3.5 h-3.5" /> Fotos (URLs, máximo 10)
+                              <Image className="w-3.5 h-3.5" /> Fotos (URLs,
+                              máximo 10)
                             </label>
                             <div className="space-y-2">
                               {editState.imageUrls.map((url, i) => (
-                                <div key={i} className="flex items-center gap-2">
+                                <div
+                                  key={i}
+                                  className="flex items-center gap-2"
+                                >
                                   {url && (
                                     <div className="w-10 h-10 rounded-md overflow-hidden bg-muted shrink-0 border border-border">
                                       <img
                                         src={url}
                                         alt=""
                                         className="w-full h-full object-cover"
-                                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                        onError={(e) => {
+                                          (
+                                            e.target as HTMLImageElement
+                                          ).style.display = "none";
+                                        }}
                                       />
                                     </div>
                                   )}
                                   <input
                                     value={url}
-                                    onChange={(e) => updateEditUrl(i, e.target.value)}
+                                    onChange={(e) =>
+                                      updateEditUrl(i, e.target.value)
+                                    }
                                     placeholder={`URL de imagen ${i + 1}`}
                                     className="flex-1 px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                                   />
@@ -486,7 +706,9 @@ export default function DashboardPage() {
                           </div>
 
                           {editError && (
-                            <p className="text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg">{editError}</p>
+                            <p className="text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
+                              {editError}
+                            </p>
                           )}
 
                           <div className="flex gap-2 pt-1">

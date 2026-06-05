@@ -10,7 +10,15 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  idleTimeoutMillis: 10_000,
+});
+
+pool.on("error", (err) => {
+  console.error("[db] idle client error (likely Neon auto-suspend):", err.message);
+});
+
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";

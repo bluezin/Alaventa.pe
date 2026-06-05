@@ -33,20 +33,20 @@ export default function CategorySidebar({ categories, activeSlug, onSelect }: Ca
       <div className="py-1">
         <button
           onClick={() => handleSelect(undefined)}
-          className={`category-item w-full flex items-center gap-3 px-4 py-2.5 text-sm ${
+          className={`category-item cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm ${
             !activeSlug ? "active font-medium" : "text-foreground"
           }`}
         >
           <LayoutGrid className="w-4 h-4 shrink-0" />
           <span>Todos</span>
         </button>
-        {categories.map((cat) => {
+        {categories?.map?.((cat) => {
           const Icon = ICON_MAP[cat.icon] ?? Tag;
           return (
             <button
               key={cat.id}
               onClick={() => handleSelect(cat.slug)}
-              className={`category-item w-full flex items-center justify-between px-4 py-2.5 text-sm ${
+              className={`category-item cursor-pointer w-full flex items-center justify-between px-4 py-2.5 text-sm ${
                 activeSlug === cat.slug ? "active font-medium" : "text-foreground"
               }`}
             >
@@ -54,7 +54,7 @@ export default function CategorySidebar({ categories, activeSlug, onSelect }: Ca
                 <Icon className="w-4 h-4 shrink-0" />
                 <span>{cat.name}</span>
               </div>
-              {cat.listingCount > 0 && (
+              {cat?.listingCount! > 0 && (
                 <span className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5">
                   {cat.listingCount}
                 </span>
