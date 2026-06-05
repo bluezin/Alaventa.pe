@@ -13,14 +13,5 @@
   "devDependencies": {
     "prettier": "^3.8.3",
     "typescript": "~5.9.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@swc/core",
-      "@clerk/shared",
-      "esbuild",
-      "msw",
-      "unrs-resolver"
-    ]
   }
 }
