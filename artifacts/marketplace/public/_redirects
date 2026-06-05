@@ -1,0 +1,2 @@
+/api/*  https://api.alaventa.pe/api/:splat  200
+/*      /index.html                          200
