@@ -3,7 +3,7 @@ import { useGetUserListings } from "@workspace/api-client-react";
 import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
 import { User, Package } from "lucide-react";
-
+// 
 export default function ProfilePage() {
   const params = useParams<{ userId: string }>();
   const { userId } = params;
