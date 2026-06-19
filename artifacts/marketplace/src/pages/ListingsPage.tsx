@@ -2,10 +2,18 @@ import { useState, useEffect } from "react";
 import { useSearch } from "wouter";
 import { useGetListings, useGetCategories } from "@workspace/api-client-react";
 import Navbar from "../components/Navbar";
+import MobileQuickActions from "../components/MobileQuickActions";
 import CategorySidebar from "../components/CategorySidebar";
 import ListingCard from "../components/ListingCard";
 import AdBanner from "../components/AdBanner";
-import { SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutGrid, SlidersHorizontal, ChevronLeft, ChevronRight, X } from "lucide-react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+} from "../components/ui/drawer";
 
 export default function ListingsPage() {
   const rawSearch = useSearch();
@@ -13,6 +21,7 @@ export default function ListingsPage() {
   const [category, setCategory] = useState(params.get("category") || undefined);
   const [search, setSearch] = useState(params.get("search") || "");
   const [page, setPage] = useState(1);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   useEffect(() => {
     const p = new URLSearchParams(rawSearch);
@@ -33,10 +42,7 @@ export default function ListingsPage() {
     <div className="min-h-screen bg-background">
       <Navbar initialSearch={search} />
 
-      {/* Ad banner */}
-      <div className="flex justify-center px-4 pt-4">
-        <AdBanner type="leaderboard" />
-      </div>
+      <MobileQuickActions onOpenCategories={() => setMobileFilterOpen(true)} />
 
       <div className="max-w-7xl mx-auto px-4 py-5">
         {/* Breadcrumb */}
@@ -58,7 +64,7 @@ export default function ListingsPage() {
 
         <div className="flex gap-5">
           {/* Sidebar */}
-          <aside className="hidden lg:block w-56 shrink-0">
+          <aside className="max-[990px]:hidden w-56 shrink-0">
             <div className="sticky top-18 space-y-4">
               <CategorySidebar
                 categories={catList}
@@ -92,7 +98,10 @@ export default function ListingsPage() {
               </div>
               <div className="flex items-center gap-2">
                 {/* Mobile category filter */}
-                <button className="lg:hidden flex items-center gap-1.5 px-3 py-2 border border-border rounded-lg text-sm bg-card">
+                <button
+                  onClick={() => setMobileFilterOpen(true)}
+                  className="min-[990px]:hidden flex cursor-pointer items-center gap-1.5 px-3 py-2 border border-border rounded-lg text-sm bg-card"
+                >
                   <SlidersHorizontal className="w-4 h-4" />
                   Filtros
                 </button>
@@ -100,7 +109,7 @@ export default function ListingsPage() {
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              <div className="grid max-[500px]:grid-cols-1 grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {Array.from({ length: 12 }).map((_, i) => (
                   <div key={i} className="bg-card rounded-xl border border-card-border overflow-hidden animate-pulse">
                     <div className="aspect-[4/3] bg-muted" />
@@ -125,7 +134,7 @@ export default function ListingsPage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                <div className="grid max-[500px]:grid-cols-1 grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                   {listings.map((l) => (
                     <ListingCard key={l.id} listing={l} />
                   ))}
@@ -158,6 +167,50 @@ export default function ListingsPage() {
           </main>
         </div>
       </div>
+
+      {/* Mobile filter drawer */}
+      <Drawer open={mobileFilterOpen} onOpenChange={setMobileFilterOpen}>
+        <DrawerContent>
+          <DrawerHeader className="flex items-center justify-between">
+            <DrawerTitle>Categorías</DrawerTitle>
+            <DrawerClose asChild>
+              <button className="p-1 rounded-full hover:bg-muted transition-colors cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </DrawerClose>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-1">
+            <DrawerClose asChild>
+              <button
+                onClick={() => { setCategory(undefined); setPage(1); setMobileFilterOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
+                  !category ? "bg-primary/10 text-primary font-medium" : "text-foreground hover:bg-muted"
+                }`}
+              >
+                <LayoutGrid className="w-4 h-4 shrink-0" />
+                <span>Todos</span>
+              </button>
+            </DrawerClose>
+            {catList.map((cat) => (
+              <DrawerClose key={cat.id} asChild>
+                <button
+                  onClick={() => { setCategory(cat.slug); setPage(1); setMobileFilterOpen(false); }}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm transition-colors ${
+                    category === cat.slug ? "bg-primary/10 text-primary font-medium" : "text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <span>{cat.name}</span>
+                  {cat.listingCount != null && cat.listingCount > 0 && (
+                    <span className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+                      {cat.listingCount}
+                    </span>
+                  )}
+                </button>
+              </DrawerClose>
+            ))}
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "../components/Navbar";
+import ImageUpload from "../components/ImageUpload";
 import {
   User,
   Phone,
@@ -30,7 +31,6 @@ import {
   RefreshCw,
   Plus,
   Package,
-  Image,
   FileText,
   ChevronDown,
   ChevronUp,
@@ -48,7 +48,7 @@ interface EditState {
 }
 
 export default function DashboardPage() {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, getToken } = useAuth();
   const { user: clerkUser } = useUser();
   const [, navigate] = useLocation();
   const qc = useQueryClient();
@@ -133,9 +133,13 @@ export default function DashboardPage() {
     setActionLoading(id);
     try {
       await deleteListing.mutateAsync({ id });
-      qc.invalidateQueries({ queryKey: getGetMyListingsQueryKey() });
-      qc.invalidateQueries({ queryKey: getGetListingsQueryKey() });
+      qc.setQueryData<Listing[]>(getGetMyListingsQueryKey(), (old) =>
+        old?.filter((l) => l.id !== id),
+      );
+      qc.invalidateQueries({ queryKey: getGetListingsQueryKey(), refetchType: "all" });
+      qc.invalidateQueries({ queryKey: getGetMyListingsQueryKey(), refetchType: "all" });
     } catch {
+      alert("Error al eliminar el anuncio. Intenta de nuevo.");
     } finally {
       setActionLoading(null);
     }
@@ -165,7 +169,7 @@ export default function DashboardPage() {
       listingId: listing.id,
       description: listing.description ?? "",
       price: listing.price || 0,
-      imageUrls: listing.imageUrls?.length ? [...listing.imageUrls] : [""],
+      imageUrls: listing.imageUrls?.length ? [...listing.imageUrls] : [],
     });
     setEditError("");
   }
@@ -204,26 +208,6 @@ export default function DashboardPage() {
     }
   }
 
-  function updateEditUrl(i: number, val: string) {
-    if (!editState) return;
-    const next = [...editState.imageUrls];
-    next[i] = val;
-    setEditState({ ...editState, imageUrls: next });
-  }
-
-  function addEditUrl() {
-    if (!editState || editState.imageUrls.length >= 10) return;
-    setEditState({ ...editState, imageUrls: [...editState.imageUrls, ""] });
-  }
-
-  function removeEditUrl(i: number) {
-    if (!editState) return;
-    setEditState({
-      ...editState,
-      imageUrls: editState.imageUrls.filter((_, j) => j !== i),
-    });
-  }
-
   const activeListings = (myListings ?? []).filter(
     (l) => l.status === "active",
   );
@@ -237,10 +221,10 @@ export default function DashboardPage() {
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Mi cuenta</h1>
+          <h1 className="text-[20px] sm:text-2xl font-bold text-foreground">Mi cuenta</h1>
           <button
             onClick={() => navigate("/publish")}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 p-2 sm:px-4 sm:py-2 rounded-full bg-accent text-primary-foreground text-sm font-bold hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" /> Nuevo anuncio
           </button>
@@ -433,7 +417,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {(myListings ?? []).map((listing) => {
+                {(myListings ?? []).filter((l) => l.status !== "deleted").map((listing) => {
                   const expiry = listing.expiresAt
                     ? new Date(listing.expiresAt)
                     : null;
@@ -536,7 +520,7 @@ export default function DashboardPage() {
                             }
                             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
                               isEditing
-                                ? "border-primary/40 bg-accent text-primary"
+                                ? "border-white bg-accent text-white"
                                 : "border-border text-foreground hover:bg-muted"
                             }`}
                           >
@@ -651,58 +635,15 @@ export default function DashboardPage() {
                           {/* Photos */}
                           <div>
                             <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
-                              <Image className="w-3.5 h-3.5" /> Fotos (URLs,
-                              máximo 10)
+                              Fotos
                             </label>
-                            <div className="space-y-2">
-                              {editState.imageUrls.map((url, i) => (
-                                <div
-                                  key={i}
-                                  className="flex items-center gap-2"
-                                >
-                                  {url && (
-                                    <div className="w-10 h-10 rounded-md overflow-hidden bg-muted shrink-0 border border-border">
-                                      <img
-                                        src={url}
-                                        alt=""
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                          (
-                                            e.target as HTMLImageElement
-                                          ).style.display = "none";
-                                        }}
-                                      />
-                                    </div>
-                                  )}
-                                  <input
-                                    value={url}
-                                    onChange={(e) =>
-                                      updateEditUrl(i, e.target.value)
-                                    }
-                                    placeholder={`URL de imagen ${i + 1}`}
-                                    className="flex-1 px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                                  />
-                                  {editState.imageUrls.length > 1 && (
-                                    <button
-                                      type="button"
-                                      onClick={() => removeEditUrl(i)}
-                                      className="p-1.5 text-destructive hover:bg-destructive/10 rounded-lg transition-colors shrink-0"
-                                    >
-                                      <X className="w-3.5 h-3.5" />
-                                    </button>
-                                  )}
-                                </div>
-                              ))}
-                              {editState.imageUrls.length < 10 && (
-                                <button
-                                  type="button"
-                                  onClick={addEditUrl}
-                                  className="flex items-center gap-1.5 text-xs text-primary hover:underline"
-                                >
-                                  <Plus className="w-3.5 h-3.5" /> Agregar foto
-                                </button>
-                              )}
-                            </div>
+                            <ImageUpload
+                              imageUrls={editState.imageUrls.filter(Boolean)}
+                              onChange={(urls) =>
+                                setEditState({ ...editState, imageUrls: urls })
+                              }
+                              getToken={getToken}
+                            />
                           </div>
 
                           {editError && (
@@ -715,7 +656,7 @@ export default function DashboardPage() {
                             <button
                               onClick={saveEditListing}
                               disabled={editSaving}
-                              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 disabled:opacity-60"
+                              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent text-primary-foreground text-sm font-semibold hover:opacity-90 disabled:opacity-60"
                             >
                               <Check className="w-3.5 h-3.5" />
                               {editSaving ? "Guardando..." : "Guardar cambios"}

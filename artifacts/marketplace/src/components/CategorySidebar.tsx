@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import {
   Car, Home, Smartphone, Sofa, Shirt, Trophy, Briefcase, Wrench, PawPrint, Tag, LayoutGrid
 } from "lucide-react";

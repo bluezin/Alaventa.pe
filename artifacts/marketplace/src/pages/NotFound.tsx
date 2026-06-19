@@ -9,7 +9,7 @@ export default function NotFound() {
         <p className="text-6xl font-black text-primary mb-4">404</p>
         <h1 className="text-xl font-bold text-foreground mb-2">Página no encontrada</h1>
         <p className="text-muted-foreground text-sm mb-6">Lo que buscas no existe o fue eliminado.</p>
-        <Link href="/" className="inline-block px-6 py-3 rounded-full bg-primary text-primary-foreground font-bold hover:opacity-90">
+        <Link href="/" className="inline-block px-6 py-3 rounded-full bg-primary text-primary-foreground font-bold hover:opacity-90 cursor-pointer">
           Volver al inicio
         </Link>
       </div>

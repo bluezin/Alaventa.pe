@@ -9,6 +9,7 @@ import {
   getClerkProxyHost,
 } from "./middlewares/clerkProxyMiddleware";
 import router from "./routes";
+import uploadRouter from "./routes/upload";
 import { logger } from "./lib/logger";
 
 const app: Express = express();
@@ -57,5 +58,6 @@ app.use(
 );
 
 app.use("/api", router);
+app.use("/api/uploads", uploadRouter);
 
 export default app;

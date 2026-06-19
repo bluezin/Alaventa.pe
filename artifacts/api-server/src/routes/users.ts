@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, usersTable, listingsTable } from "@workspace/db";
-import { eq, and, count } from "drizzle-orm";
+import { eq, and, ne, count } from "drizzle-orm";
 import { clerkClient } from "@clerk/express";
 import { requireAuth } from "../middlewares/auth";
 import { UpdateMyProfileBody } from "@workspace/api-zod";
@@ -96,7 +96,7 @@ router.get("/me/listings", requireAuth, async (req, res) => {
     const listings = await db
       .select()
       .from(listingsTable)
-      .where(eq(listingsTable.userId, userId))
+      .where(and(eq(listingsTable.userId, userId), ne(listingsTable.status, "deleted")))
       .orderBy(listingsTable.createdAt);
     const enriched = await enrichListings(listings);
     res.json(enriched);

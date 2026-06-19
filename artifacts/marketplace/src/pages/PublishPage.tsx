@@ -5,10 +5,11 @@ import { useCreateListing, useGetCategories } from "@workspace/api-client-react"
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetListingsQueryKey, getGetMyListingsQueryKey } from "@workspace/api-client-react";
 import Navbar from "../components/Navbar";
-import { X, Plus, CheckCircle, AlertCircle } from "lucide-react";
+import ImageUpload from "../components/ImageUpload";
+import { CheckCircle, AlertCircle, ChevronRight } from "lucide-react";
 
 export default function PublishPage() {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, getToken } = useAuth();
   const [, navigate] = useLocation();
   const { data: categories } = useGetCategories();
   const qc = useQueryClient();
@@ -21,7 +22,7 @@ export default function PublishPage() {
     price: "",
     phone: "",
     location: "",
-    imageUrls: [""],
+    imageUrls: [] as string[],
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -56,6 +57,10 @@ export default function PublishPage() {
     }
     if (form.phone.replace(/\D/g, "").length < 9) {
       setError("Ingresa un número de celular válido (mínimo 9 dígitos).");
+      return;
+    }
+    if (form.description.trim().length < 10) {
+      setError("La descripción debe tener al menos 10 caracteres.");
       return;
     }
     try {
@@ -101,6 +106,11 @@ export default function PublishPage() {
       <Navbar />
 
       <div className="max-w-2xl mx-auto px-4 py-8">
+        <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
+          <button onClick={() => navigate("/")} className="hover:text-foreground transition-colors cursor-pointer">Inicio</button>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-foreground">Publicar</span>
+        </nav>
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">Publicar anuncio gratis</h1>
           <p className="text-muted-foreground text-sm mt-1">Tu anuncio estará activo por 30 días</p>
@@ -118,7 +128,7 @@ export default function PublishPage() {
                   onClick={() => setForm((f) => ({ ...f, categoryId: String(cat.id) }))}
                   className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-all ${
                     form.categoryId === String(cat.id)
-                      ? "border-primary bg-accent text-primary"
+                      ? "border-white bg-accent text-white"
                       : "border-border bg-background text-foreground hover:border-primary/50"
                   }`}
                 >
@@ -198,41 +208,12 @@ export default function PublishPage() {
           {/* Images */}
           <div className="bg-card rounded-xl border border-card-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Fotos</h2>
-            <p className="text-xs text-muted-foreground mb-3">Agrega URLs de imágenes (máximo 10)</p>
-            <div className="space-y-2">
-              {form.imageUrls.map((url, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <input
-                    value={url}
-                    onChange={(e) => {
-                      const next = [...form.imageUrls];
-                      next[i] = e.target.value;
-                      setForm((f) => ({ ...f, imageUrls: next }));
-                    }}
-                    placeholder={`URL de imagen ${i + 1}`}
-                    className="flex-1 px-4 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                  />
-                  {i > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, imageUrls: f.imageUrls.filter((_, j) => j !== i) }))}
-                      className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-              {form.imageUrls.length < 10 && (
-                <button
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, imageUrls: [...f.imageUrls, ""] }))}
-                  className="flex items-center gap-1.5 text-sm text-primary hover:underline"
-                >
-                  <Plus className="w-4 h-4" /> Agregar otra imagen
-                </button>
-              )}
-            </div>
+            <p className="text-xs text-muted-foreground mb-3">Las primeras fotos serán las más visibles</p>
+            <ImageUpload
+              imageUrls={form.imageUrls.filter(Boolean)}
+              onChange={(urls) => setForm((f) => ({ ...f, imageUrls: urls }))}
+              getToken={getToken}
+            />
           </div>
 
           {error && (
@@ -245,7 +226,7 @@ export default function PublishPage() {
           <button
             type="submit"
             disabled={createListing.isPending}
-            className="w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-base hover:opacity-90 transition-opacity disabled:opacity-60"
+            className="w-full py-3 cursor-pointer sm:py-4 rounded-full bg-primary text-primary-foreground font-bold text-[17px] sm:text-base hover:opacity-90 transition-opacity disabled:opacity-60"
           >
             {createListing.isPending ? "Publicando..." : "Publicar anuncio gratis"}
           </button>

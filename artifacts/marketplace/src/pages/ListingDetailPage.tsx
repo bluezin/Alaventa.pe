@@ -14,6 +14,9 @@ import {
   Share2,
   ArrowLeft,
   Eye,
+  EyeOff,
+  Facebook,
+  Instagram,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -45,6 +48,7 @@ export default function ListingDetailPage() {
   const [imgIdx, setImgIdx] = useState(0);
   const [showPhone, setShowPhone] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   const { data: relatedData } = useGetListings(
     { category: listing?.categorySlug, limit: 5 },
@@ -55,14 +59,47 @@ export default function ListingDetailPage() {
   ).slice(0, 4);
 
   function handleShare() {
+    setShowShare(!showShare);
+  }
+
+  function getShareText(): string {
+    const title = listing?.title ?? "Mira este anuncio en Mercado Perú";
+    const price = listing?.price != null ? formatPrice(listing.price) : "A convenir";
+    const phone = listing?.userPhone ?? "";
+    let text = `${title}\nPrecio: ${price}`;
+    if (phone) text += `\nTeléfono: ${phone}`;
+    text += `\n\n${window.location.href}`;
+    return text;
+  }
+
+  function shareOn(platform: "facebook" | "whatsapp" | "instagram") {
     const url = window.location.href;
-    if (navigator.share) {
-      navigator.share({ title: listing?.title, url });
-    } else {
-      navigator.clipboard.writeText(url).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
+
+    switch (platform) {
+      case "facebook":
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(getShareText())}`,
+          "_blank",
+          "noopener,noreferrer",
+        );
+        break;
+      case "whatsapp":
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(getShareText())}`,
+          "_blank",
+          "noopener,noreferrer",
+        );
+        break;
+      case "instagram":
+        if (navigator.share) {
+          navigator.share({ title: listing?.title ?? "Mira este anuncio en Mercado Perú", text: getShareText(), url: window.location.href });
+        } else {
+          navigator.clipboard.writeText(getShareText()).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          });
+        }
+        break;
     }
   }
 
@@ -98,7 +135,7 @@ export default function ListingDetailPage() {
           </p>
           <button
             onClick={() => navigate("/")}
-            className="text-primary hover:underline"
+            className="text-primary cursor-pointer hover:underline"
           >
             Volver al inicio
           </button>
@@ -109,10 +146,7 @@ export default function ListingDetailPage() {
 
   const images = listing.imageUrls ?? [];
   const phone = listing.userPhone ?? "";
-  const maskedPhone =
-    showPhone
-      ? phone
-      : phone.replace(/(\d{3})\d{4}(\d{3})/, "$1****$2");
+  const maskedPhone = showPhone ? phone : "*********";
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,7 +156,7 @@ export default function ListingDetailPage() {
         {/* Back button */}
         <button
           onClick={() => window.history.back()}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-5 transition-colors"
+          className="flex items-center cursor-pointer gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-5 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver
@@ -235,7 +269,7 @@ export default function ListingDetailPage() {
           <div className="space-y-4">
             {/* Info card */}
             <div className="bg-card rounded-2xl border border-card-border p-5 shadow-sm">
-              <span className="inline-block text-xs font-medium text-primary bg-accent px-2.5 py-1 rounded-full mb-3">
+              <span className="inline-block text-xs font-medium text-white bg-accent px-2.5 py-1 rounded-full mb-3">
                 {listing.categoryName}
               </span>
 
@@ -301,16 +335,20 @@ export default function ListingDetailPage() {
 
               {/* Phone */}
               <button
-                onClick={() => setShowPhone(!showPhone)}
+                onClick={() => phone && setShowPhone(!showPhone)}
                 className="w-full flex items-center gap-3 bg-muted hover:bg-muted/80 transition-colors rounded-xl px-4 py-3 mb-3 text-left"
               >
                 <Phone className="w-4 h-4 text-primary shrink-0" />
                 <span className="flex-1 font-mono text-sm tracking-wider text-foreground">
                   {maskedPhone || "Sin teléfono"}
                 </span>
-                {!showPhone && phone && (
-                  <span className="text-xs text-primary font-medium">
-                    Ver
+                {phone && (
+                  <span className="text-xs text-primary font-medium flex items-center gap-1">
+                    {showPhone ? (
+                      <><EyeOff className="w-3.5 h-3.5" /> Ocultar</>
+                    ) : (
+                      <><Eye className="w-3.5 h-3.5" /> Ver</>
+                    )}
                   </span>
                 )}
               </button>
@@ -328,13 +366,45 @@ export default function ListingDetailPage() {
               </a>
 
               {/* Share */}
-              <button
-                onClick={handleShare}
-                className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-card-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
-              >
-                <Share2 className="w-4 h-4" />
-                {copied ? "¡Enlace copiado!" : "Compartir anuncio"}
-              </button>
+              <div className="mt-3">
+                <button
+                  onClick={handleShare}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-card-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Compartir anuncio
+                </button>
+
+                {showShare && (
+                  <div className="mt-2 grid grid-cols-3 gap-2">
+                    <button
+                      onClick={() => shareOn("facebook")}
+                      className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-card-border hover:bg-blue-50 transition-colors"
+                    >
+                      <Facebook className="w-5 h-5 text-[#1877F2]" />
+                      <span className="text-[10px] text-muted-foreground font-medium">Facebook</span>
+                    </button>
+                    <button
+                      onClick={() => shareOn("instagram")}
+                      className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-card-border hover:bg-pink-50 transition-colors"
+                    >
+                      <Instagram className="w-5 h-5 text-[#E4405F]" />
+                      <span className="text-[10px] text-muted-foreground font-medium">
+                        {copied ? "¡Copiado!" : "Instagram"}
+                      </span>
+                    </button>
+                    <a
+                      href={`https://wa.me/?text=${encodeURIComponent(getShareText())}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-card-border hover:bg-green-50 transition-colors"
+                    >
+                      <MessageCircle className="w-5 h-5 text-[#25D366]" />
+                      <span className="text-[10px] text-muted-foreground font-medium">WhatsApp</span>
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Safety tips */}
