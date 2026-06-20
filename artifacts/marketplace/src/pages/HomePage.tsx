@@ -69,7 +69,7 @@ export default function HomePage() {
   const listings = listingsPage?.listings ?? [];
   const total = listingsPage?.total ?? 0;
   const totalPages = Math.ceil(total / 24);
-  const catList = categories ?? [];
+  const catList = Array.isArray(categories) ? categories : [];
 
   return (
     <div className="min-h-screen bg-background">
