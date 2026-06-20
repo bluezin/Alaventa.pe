@@ -45,6 +45,10 @@ export default function ListingsPage() {
       <MobileQuickActions onOpenCategories={() => setMobileFilterOpen(true)} />
 
       <div className="max-w-7xl mx-auto px-4 py-5">
+        <div className="flex justify-center mb-4">
+          <AdBanner type="leaderboard" />
+        </div>
+
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
           <a href="/" className="hover:text-primary transition-colors">Inicio</a>
@@ -64,7 +68,7 @@ export default function ListingsPage() {
 
         <div className="flex gap-5">
           {/* Sidebar */}
-          <aside className="max-[990px]:hidden w-56 shrink-0">
+          <aside className="max-[800px]:hidden w-56 shrink-0">
             <div className="sticky top-18 space-y-4">
               <CategorySidebar
                 categories={catList}
@@ -100,7 +104,7 @@ export default function ListingsPage() {
                 {/* Mobile category filter */}
                 <button
                   onClick={() => setMobileFilterOpen(true)}
-                  className="min-[990px]:hidden flex cursor-pointer items-center gap-1.5 px-3 py-2 border border-border rounded-lg text-sm bg-card"
+                  className="min-[800px]:hidden flex cursor-pointer items-center gap-1.5 px-3 py-2 border border-border rounded-lg text-sm bg-card"
                 >
                   <SlidersHorizontal className="w-4 h-4" />
                   Filtros
