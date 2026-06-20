@@ -10,7 +10,7 @@ export default function MobileQuickActions({ onOpenCategories }: MobileQuickActi
   const [, navigate] = useLocation();
 
   return (
-    <div className="hidden max-[500px]:flex border-b border-border justify-center gap-12 px-4 py-3">
+    <div className="hidden max-[699px]:flex border-b border-border justify-center gap-12 px-4 py-3">
       <button
         onClick={onOpenCategories}
         className="flex flex-col items-center gap-1 cursor-pointer"

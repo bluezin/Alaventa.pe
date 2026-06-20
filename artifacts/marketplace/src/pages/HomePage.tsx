@@ -171,7 +171,7 @@ export default function HomePage() {
       </section>
 
       {/* Ad banner */}
-      <section className="max-[500px]:block hidden mx-4 mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-violet-50 to-purple-100 p-5">
+      <section className="max-[699px]:block hidden mx-4 mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-violet-50 to-purple-100 p-5">
         <div className="flex items-center justify-between gap-4">
           <div className="max-w-[60%]">
             <h2 className="text-[20px] font-bold text-slate-900">
