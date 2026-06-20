@@ -9,12 +9,13 @@ import {
   Redirect,
 } from "wouter";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
-import { ClerkProvider, SignIn, SignUp, useClerk, Show } from "@clerk/react";
+import { ClerkProvider, SignIn, SignUp, useClerk, useAuth, Show } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { shadcn } from "@clerk/themes";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { queryClient } from "./lib/api";
+import { setAuthTokenGetter } from "@workspace/api-client-react";
 
 import HomePage from "./pages/HomePage";
 import ListingsPage from "./pages/ListingsPage";
@@ -127,24 +128,22 @@ function SignUpPage() {
   );
 }
 
-function ClerkQueryClientCacheInvalidator() {
-  const { addListener } = useClerk();
-  const qc = useQueryClient();
-  const prevUserIdRef = useRef<string | null | undefined>(undefined);
+function ClerkAuthBridge() {
+  const { getToken, isSignedIn } = useAuth();
 
   useEffect(() => {
-    const unsubscribe = addListener(({ user }) => {
-      const userId = user?.id ?? null;
-      if (
-        prevUserIdRef.current !== undefined &&
-        prevUserIdRef.current !== userId
-      ) {
-        qc.clear();
-      }
-      prevUserIdRef.current = userId;
-    });
-    return unsubscribe;
-  }, [addListener, qc]);
+    if (isSignedIn) {
+      setAuthTokenGetter(async () => {
+        try {
+          return await getToken();
+        } catch {
+          return null;
+        }
+      });
+    } else {
+      setAuthTokenGetter(null);
+    }
+  }, [getToken, isSignedIn]);
 
   return null;
 }
@@ -197,7 +196,7 @@ function ClerkProviderWithRoutes() {
     >
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <ClerkQueryClientCacheInvalidator />
+          <ClerkAuthBridge />
           <Router />
           <Toaster />
         </TooltipProvider>
