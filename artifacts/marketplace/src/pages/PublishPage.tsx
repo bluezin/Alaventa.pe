@@ -126,7 +126,7 @@ export default function PublishPage() {
                   key={cat.id}
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, categoryId: String(cat.id) }))}
-                  className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                  className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-all cursor-pointer ${
                     form.categoryId === String(cat.id)
                       ? "border-white bg-accent text-white"
                       : "border-border bg-background text-foreground hover:border-primary/50"
