@@ -5,7 +5,7 @@ import { GoPerson } from "react-icons/go";
 interface MobileQuickActionsProps {
   onOpenCategories?: () => void;
 }
-
+// 
 export default function MobileQuickActions({ onOpenCategories }: MobileQuickActionsProps) {
   const [, navigate] = useLocation();
 
