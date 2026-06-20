@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth, useUser } from "@clerk/react";
+import { useAuth, useUser, useClerk } from "@clerk/react";
 import {
   useGetMyProfile,
   useGetMyListings,
@@ -50,6 +50,7 @@ interface EditState {
 export default function DashboardPage() {
   const { isSignedIn, getToken } = useAuth();
   const { user: clerkUser } = useUser();
+  const { signOut } = useClerk();
   const [, navigate] = useLocation();
   const qc = useQueryClient();
 
@@ -342,6 +343,12 @@ export default function DashboardPage() {
                     className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-border text-sm hover:bg-muted transition-colors"
                   >
                     <Edit3 className="w-3.5 h-3.5" /> Editar perfil
+                  </button>
+                  <button
+                    onClick={() => signOut()}
+                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-red-200 text-red-600 text-sm hover:bg-red-50 transition-colors cursor-pointer"
+                  >
+                    Cerrar sesión
                   </button>
                 </div>
               )}
