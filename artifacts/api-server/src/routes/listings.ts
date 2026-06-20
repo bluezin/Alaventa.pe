@@ -3,6 +3,8 @@ import { db, listingsTable, categoriesTable, usersTable } from "@workspace/db";
 import { eq, and, or, ilike, desc, asc, sql, count, lte, gte } from "drizzle-orm";
 import { requireAuth, optionalAuth } from "../middlewares/auth";
 import { CreateListingBody, UpdateListingBody, FeatureListingBody } from "@workspace/api-zod";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { getR2Client, getR2Bucket, getR2PublicUrl } from "../lib/r2";
 
 const router = Router();
 
@@ -265,6 +267,18 @@ router.delete("/:id", requireAuth, async (req, res) => {
     if (rows.length === 0) {
       res.status(404).json({ error: "Not found or unauthorized" });
       return;
+    }
+    const listing = rows[0];
+    const r2 = getR2Client();
+    const bucket = getR2Bucket();
+    const publicUrl = getR2PublicUrl();
+    for (const url of listing.imageUrls) {
+      const key = url.startsWith(publicUrl) ? url.slice(publicUrl.length + 1) : url;
+      try {
+        await r2.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+      } catch {
+        // ignore if image already gone
+      }
     }
     await db.update(listingsTable).set({ status: "deleted" }).where(eq(listingsTable.id, id));
     res.status(204).send();
