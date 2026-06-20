@@ -91,7 +91,7 @@ export default function Navbar({ onSearch, initialSearch = "" }: NavbarProps) {
               <Show when="signed-in">
                 <Link
                   href="/publish"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-sm font-semibold"
                 >
                   <Plus className="w-4 h-4" />
                   Publicar gratis
@@ -116,18 +116,21 @@ export default function Navbar({ onSearch, initialSearch = "" }: NavbarProps) {
               <Show when="signed-out">
                 <Link
                   href="/publish"
-                  className="px-4 py-2 rounded-full bg-accent text-sm font-semibold"
+                  className="px-4 py-2 rounded-full bg-accent text-white text-sm font-semibold"
                 >
                   Publicar gratis
                 </Link>
 
-                <Link href="/sign-in" className="text-sm">
+                <Link
+                  href="/sign-in"
+                  className="text-sm pl-6 font-bold hover:text-accent"
+                >
                   Ingresar
                 </Link>
-
+                <p>/</p>
                 <Link
                   href="/sign-up"
-                  className="px-4 py-2 border rounded-full text-sm"
+                  className="font-bold text-sm hover:text-accent"
                 >
                   Registrarse
                 </Link>
@@ -166,15 +169,27 @@ export default function Navbar({ onSearch, initialSearch = "" }: NavbarProps) {
           </Show>
 
           <Show when="signed-out">
-            <Link href="/sign-in" className="py-2 text-center">
-              Ingresar
-            </Link>
+            <div className="flex gap-3 justify-center mt-4">
+              <Link
+                href="/sign-in"
+                className="text-sm pl-6 font-bold hover:text-accent"
+              >
+                Ingresar
+              </Link>
+              <p>/</p>
+              <Link
+                href="/sign-up"
+                className="font-bold text-sm hover:text-accent"
+              >
+                Registrarse
+              </Link>
+            </div>
 
             <Link
-              href="/sign-up"
-              className="py-2 text-center border rounded-full"
+              href="/publish"
+              className="py-2 max-[300px]:w-full w-60 m-auto mt-3 text-center bg-primary text-white rounded-full"
             >
-              Registrarse
+              Publicar gratis
             </Link>
           </Show>
         </div>

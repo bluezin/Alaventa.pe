@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { Link } from "wouter";
+import { ArrowLeft } from "lucide-react";
 import {
   Switch,
   Route,
@@ -60,7 +62,7 @@ const clerkAppearance = {
   elements: {
     rootBox: "flex justify-center",
     cardBox:
-      "bg-white rounded-2xl w-[440px] max-w-full overflow-hidden shadow-lg",
+      "bg-white rounded-2xl max-[550px]:w-full w-[440px] overflow-hidden shadow-lg",
     card: "!shadow-none !border-0 !bg-transparent !rounded-none",
     footer: "!shadow-none !border-0 !bg-transparent !rounded-none",
     headerTitle: "text-foreground font-bold",
@@ -76,7 +78,7 @@ const clerkAppearance = {
     logoBox: "mb-2",
     logoImage: "h-8 w-auto",
     socialButtonsBlockButton: "border-border hover:bg-muted transition-colors",
-    formButtonPrimary: "bg-primary hover:opacity-90 transition-opacity",
+    formButtonPrimary: "bg-accent hover:opacity-90 transition-opacity",
     formFieldInput: "bg-background border-input text-foreground",
     footerAction: "bg-transparent",
     dividerLine: "bg-border",
@@ -90,12 +92,18 @@ const clerkAppearance = {
 function SignInPage() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
-      <SignIn
-        routing="path"
-        path={`${basePath}/sign-in`}
-        signUpUrl={`${basePath}/sign-up`}
-        afterSignInUrl={`${basePath}/dashboard`}
-      />
+      <div className="flex flex-col items-center w-full max-w-md gap-3">
+        <Link href="/" className="self-start flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          Volver al inicio
+        </Link>
+        <SignIn
+          routing="path"
+          path={`${basePath}/sign-in`}
+          signUpUrl={`${basePath}/sign-up`}
+          afterSignInUrl={`${basePath}/dashboard`}
+        />
+      </div>
     </div>
   );
 }
@@ -103,12 +111,18 @@ function SignInPage() {
 function SignUpPage() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
-      <SignUp
-        routing="path"
-        path={`${basePath}/sign-up`}
-        signInUrl={`${basePath}/sign-in`}
-        afterSignUpUrl={`${basePath}/dashboard`}
-      />
+      <div className="flex flex-col items-center w-full max-w-md gap-3">
+        <Link href="/" className="self-start flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          Volver al inicio
+        </Link>
+        <SignUp
+          routing="path"
+          path={`${basePath}/sign-up`}
+          signInUrl={`${basePath}/sign-in`}
+          afterSignUpUrl={`${basePath}/dashboard`}
+        />
+      </div>
     </div>
   );
 }
@@ -164,13 +178,13 @@ function ClerkProviderWithRoutes() {
       localization={{
         signIn: {
           start: {
-            title: "Ingresar a Mercado Perú",
+            title: "Ingresar a Alaventa",
             subtitle: "Bienvenido de vuelta",
           },
         },
         signUp: {
           start: {
-            title: "Crear cuenta en Mercado Perú",
+            title: "Crear cuenta en Alaventa",
             subtitle: "Gratis, rápido y seguro",
           },
         },
