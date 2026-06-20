@@ -8,7 +8,8 @@ export async function uploadImage(file: File, getToken?: () => Promise<string | 
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch("/api/uploads", {
+  const base = import.meta.env.VITE_API_BASE_URL ?? "";
+  const res = await fetch(`${base}/api/uploads`, {
     method: "POST",
     headers,
     body: formData,
