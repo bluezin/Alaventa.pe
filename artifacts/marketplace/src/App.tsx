@@ -24,6 +24,7 @@ import ListingDetailPage from "./pages/ListingDetailPage";
 import PublishPage from "./pages/PublishPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
+import PoliciesPage from "./pages/PoliciesPage";
 import NotFound from "./pages/NotFound";
 //
 const clerkPubKey = publishableKeyFromHost(
@@ -158,6 +159,7 @@ function Router() {
       <Route path="/publish" component={PublishPage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/profile/:userId" component={ProfilePage} />
+      <Route path="/politicas" component={PoliciesPage} />
       <Route path="/sign-in/*?" component={SignInPage} />
       <Route path="/sign-up/*?" component={SignUpPage} />
       <Route component={NotFound} />

@@ -3,6 +3,7 @@ import { useSearch } from "wouter";
 import { useGetListings, useGetCategories } from "@workspace/api-client-react";
 import SEOHead from "../components/SEOHead";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import MobileQuickActions from "../components/MobileQuickActions";
 import CategorySidebar from "../components/CategorySidebar";
 import ListingCard from "../components/ListingCard";
@@ -223,6 +224,7 @@ export default function ListingsPage() {
           </div>
         </DrawerContent>
       </Drawer>
+      <Footer />
     </div>
   );
 }

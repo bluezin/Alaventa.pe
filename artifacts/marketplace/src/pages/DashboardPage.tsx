@@ -17,6 +17,7 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import ImageUpload from "../components/ImageUpload";
 import {
   User,
@@ -685,6 +686,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

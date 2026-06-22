@@ -5,6 +5,7 @@ import { useCreateListing, useGetCategories } from "@workspace/api-client-react"
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetListingsQueryKey, getGetMyListingsQueryKey } from "@workspace/api-client-react";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import ImageUpload from "../components/ImageUpload";
 import { CheckCircle, AlertCircle, ChevronRight } from "lucide-react";
 
@@ -235,6 +236,7 @@ export default function PublishPage() {
           </p>
         </form>
       </div>
+      <Footer />
     </div>
   );
 }

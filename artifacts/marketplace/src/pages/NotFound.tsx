@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function NotFound() {
   return (
@@ -13,6 +14,7 @@ export default function NotFound() {
           Volver al inicio
         </Link>
       </div>
+      <Footer />
     </div>
   );
 }

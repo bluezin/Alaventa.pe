@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import { useGetListing, useGetListings } from "@workspace/api-client-react";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import ListingCard from "../components/ListingCard";
 import SEOHead from "../components/SEOHead";
 import {
@@ -464,6 +465,7 @@ export default function ListingDetailPage() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

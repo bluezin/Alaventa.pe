@@ -7,6 +7,7 @@ import {
 } from "@workspace/api-client-react";
 import SEOHead from "../components/SEOHead";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import MobileQuickActions from "../components/MobileQuickActions";
 import CategorySidebar from "../components/CategorySidebar";
 import ListingCard from "../components/ListingCard";
@@ -423,6 +424,7 @@ export default function HomePage() {
           </div>
         </DrawerContent>
       </Drawer>
+      <Footer />
     </div>
   );
 }
