@@ -9,6 +9,7 @@ import {
   Redirect,
 } from "wouter";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { HelmetProvider } from "react-helmet-async";
 import { ClerkProvider, SignIn, SignUp, useClerk, useAuth, Show } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { shadcn } from "@clerk/themes";
@@ -196,8 +197,10 @@ function ClerkProviderWithRoutes() {
     >
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <ClerkAuthBridge />
-          <Router />
+          <HelmetProvider>
+            <ClerkAuthBridge />
+            <Router />
+          </HelmetProvider>
           <Toaster />
         </TooltipProvider>
       </QueryClientProvider>

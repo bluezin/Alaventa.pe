@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useParams, useLocation } from "wouter";
+import { useParams, useLocation, Link } from "wouter";
 import { useGetListing, useGetListings } from "@workspace/api-client-react";
 import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
+import SEOHead from "../components/SEOHead";
 import {
   MapPin,
   MessageCircle,
@@ -148,8 +149,32 @@ export default function ListingDetailPage() {
   const phone = listing.userPhone ?? "";
   const maskedPhone = showPhone ? phone : "*********";
 
+  const seoImage = images[0] ?? undefined;
+  const seoJsonLd = listing
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: listing.title,
+        description: listing.description,
+        image: images.length > 0 ? images[0] : undefined,
+        offers: {
+          "@type": "Offer",
+          price: listing.price ?? 0,
+          priceCurrency: listing.currency ?? "PEN",
+          availability: "https://schema.org/InStock",
+        },
+      }
+    : undefined;
+
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title={listing?.title}
+        description={listing?.description?.slice(0, 160)}
+        image={seoImage}
+        url={`https://alaventa.pe/listings/${id}`}
+        jsonLd={seoJsonLd}
+      />
       <Navbar />
 
       <div className="max-w-5xl mx-auto px-4 py-5">
@@ -313,7 +338,10 @@ export default function ListingDetailPage() {
               </p>
 
               {/* Avatar + name */}
-              <div className="flex items-center gap-3 mb-4">
+              <Link
+                href={`/profile/${listing.userId}`}
+                className="flex items-center gap-3 mb-4 cursor-pointer"
+              >
                 {listing.userAvatarUrl ? (
                   <img
                     src={listing.userAvatarUrl}
@@ -331,7 +359,7 @@ export default function ListingDetailPage() {
                   </p>
                   <p className="text-xs text-muted-foreground">Vendedor</p>
                 </div>
-              </div>
+              </Link>
 
               {/* Phone */}
               <button

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearch } from "wouter";
 import { useGetListings, useGetCategories } from "@workspace/api-client-react";
+import SEOHead from "../components/SEOHead";
 import Navbar from "../components/Navbar";
 import MobileQuickActions from "../components/MobileQuickActions";
 import CategorySidebar from "../components/CategorySidebar";
@@ -38,8 +39,15 @@ export default function ListingsPage() {
   const totalPages = Math.ceil(total / 24);
   const catList = Array.isArray(categories) ? categories : [];
 
+  const pageTitle = category
+    ? `Anuncios en ${category}`
+    : search
+    ? `Resultados para "${search}"`
+    : "Todos los anuncios";
+
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title={pageTitle} />
       <Navbar initialSearch={search} />
 
       <MobileQuickActions onOpenCategories={() => setMobileFilterOpen(true)} />

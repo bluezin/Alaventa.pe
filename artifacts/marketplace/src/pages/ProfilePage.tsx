@@ -1,5 +1,6 @@
 import { useParams, Link } from "wouter";
 import { useGetUserListings } from "@workspace/api-client-react";
+import SEOHead from "../components/SEOHead";
 import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
 import { User, Package } from "lucide-react";
@@ -15,6 +16,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title={`Anuncios de ${sellerName}`} />
       <Navbar />
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Seller header */}
@@ -52,7 +54,7 @@ export default function ProfilePage() {
             <p className="font-semibold text-foreground">Este vendedor no tiene anuncios activos</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid gap-3 grid-cols-1 min-[500px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
             {listings!.map((l) => (
               <ListingCard key={l.id} listing={l} />
             ))}

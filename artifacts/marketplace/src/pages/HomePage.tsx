@@ -5,6 +5,7 @@ import {
   useGetCategories,
   useGetListingStats,
 } from "@workspace/api-client-react";
+import SEOHead from "../components/SEOHead";
 import Navbar from "../components/Navbar";
 import MobileQuickActions from "../components/MobileQuickActions";
 import CategorySidebar from "../components/CategorySidebar";
@@ -73,23 +74,24 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead />
       <Navbar onSearch={handleSearch} initialSearch={search} />
 
       <MobileQuickActions onOpenCategories={() => setMobileFilterOpen(true)} />
 
       {/* Hero */}
       <section className="max-[900px]:hidden relative overflow-hidden bg-[#F7F5F4] py-7">
-        <div className="container mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-10 items-start">
+        <div className="container m-auto px-6">
+          <div className="max-[1340px]:grid-cols-[580px_400px] max-[1050px]:grid-cols-[550px_300px] grid grid-cols-[700px_500px] items-center justify-center">
             {/* LEFT */}
             <div>
-              <h1 className="lg:text-[40px] font-extrabold uppercase leading-tight">
+              <h1 className="lg:text-[40px] text-[30px] font-extrabold uppercase leading-tight">
                 <span className="text-[#2D0A84]">Vende lo que quieras,</span>
                 <br />
                 <span className="text-[#FF7A00]">compra lo que necesitas.</span>
               </h1>
 
-              <p className="mt-6 text-[19px] text-slate-700">
+              <p className="mt-6 text-[16px] lg:text-[19px] text-slate-700">
                 Productos, servicios, vehículos, inmuebles y{" "}
                 <span className="font-bold text-[#2D0A84] underline decoration-[#FF7A00]">
                   más.
@@ -97,7 +99,7 @@ export default function HomePage() {
               </p>
 
               {/* Features */}
-              <div className="grid grid-cols-2 mr-9 lg:grid-cols-4 gap-6 mt-5">
+              <div className="grid grid-cols-2 mr-9 lg:grid-cols-4 gap-4 lg:gap-6 mt-5">
                 {[
                   {
                     title: "100% GRATIS",
@@ -126,7 +128,7 @@ export default function HomePage() {
                 ].map((item) => (
                   <div key={item.title}>
                     <div
-                      className={`w-14 h-14 rounded-full m-auto flex items-center justify-center text-white text-3xl ${item.color}`}
+                      className={`w-10 h-10 lg:w-14 lg:h-14 rounded-full m-auto flex items-center justify-center text-white text-[20px] lg:text-3xl ${item.color}`}
                     >
                       {item.icon}
                     </div>
@@ -144,7 +146,7 @@ export default function HomePage() {
 
               {/* CTA */}
               <div className="mt-5">
-                <button className="bg-[#2D0A84] hover:bg-[#24066d] transition text-white px-3 py-2 rounded-full font-bold text-[17px] flex items-center gap-4">
+                <button className="bg-[#2D0A84] hover:bg-[#24066d] transition text-white px-3 py-2 rounded-full font-bold text-[14px] lg:text-[17px] flex items-center gap-4">
                   <span className="bg-white text-[#2D0A84] w-8 h-8 rounded-full flex items-center justify-center">
                     <FaSearch />
                   </span>
@@ -153,7 +155,7 @@ export default function HomePage() {
                 </button>
               </div>
 
-              <p className="mt-6 justify-center text-[16px] text-slate-700 flex gap-1 font-poppins">
+              <p className="mt-6 justify-center text-[14px] lg:text-[16px] text-slate-700 flex gap-1 font-poppins">
                 <span className="flex items-center gap-3">
                   <FaRegHeart /> Una comunidad. Infinitas
                 </span>
