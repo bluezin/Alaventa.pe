@@ -54,11 +54,11 @@ export default function ListingDetailPage() {
 
   const { data: relatedData } = useGetListings(
     { category: listing?.categorySlug, limit: 5 },
-    { query: { enabled: !!listing?.categorySlug } }
+    { query: { enabled: !!listing?.categorySlug } },
   );
-  const relatedListings = (relatedData?.listings ?? []).filter(
-    (l) => l.id !== id
-  ).slice(0, 4);
+  const relatedListings = (relatedData?.listings ?? [])
+    .filter((l) => l.id !== id)
+    .slice(0, 4);
 
   function handleShare() {
     setShowShare(!showShare);
@@ -66,7 +66,8 @@ export default function ListingDetailPage() {
 
   function getShareText(): string {
     const title = listing?.title ?? "Mira este anuncio en Mercado Perú";
-    const price = listing?.price != null ? formatPrice(listing.price) : "A convenir";
+    const price =
+      listing?.price != null ? formatPrice(listing.price) : "A convenir";
     const phone = listing?.userPhone ?? "";
     let text = `${title}\nPrecio: ${price}`;
     if (phone) text += `\nTeléfono: ${phone}`;
@@ -91,16 +92,6 @@ export default function ListingDetailPage() {
           "_blank",
           "noopener,noreferrer",
         );
-        break;
-      case "instagram":
-        if (navigator.share) {
-          navigator.share({ title: listing?.title ?? "Mira este anuncio en Mercado Perú", text: getShareText(), url: window.location.href });
-        } else {
-          navigator.clipboard.writeText(getShareText()).then(() => {
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-          });
-        }
         break;
     }
   }
@@ -212,7 +203,9 @@ export default function ListingDetailPage() {
                     <>
                       <button
                         onClick={() =>
-                          setImgIdx((i) => (i - 1 + images.length) % images.length)
+                          setImgIdx(
+                            (i) => (i - 1 + images.length) % images.length,
+                          )
                         }
                         className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
                       >
@@ -269,7 +262,9 @@ export default function ListingDetailPage() {
                     key={i}
                     onClick={() => setImgIdx(i)}
                     className={`shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
-                      i === imgIdx ? "border-primary" : "border-transparent opacity-60 hover:opacity-90"
+                      i === imgIdx
+                        ? "border-primary"
+                        : "border-transparent opacity-60 hover:opacity-90"
                     }`}
                   >
                     <img
@@ -284,7 +279,9 @@ export default function ListingDetailPage() {
 
             {/* Description */}
             <div className="bg-card rounded-2xl border border-card-border p-5 shadow-sm">
-              <h2 className="font-semibold text-foreground mb-3">Descripción</h2>
+              <h2 className="font-semibold text-foreground mb-3">
+                Descripción
+              </h2>
               <p className="text-foreground/75 leading-relaxed whitespace-pre-line text-sm">
                 {listing.description || "Sin descripción."}
               </p>
@@ -374,9 +371,13 @@ export default function ListingDetailPage() {
                 {phone && (
                   <span className="text-xs text-primary font-medium flex items-center gap-1">
                     {showPhone ? (
-                      <><EyeOff className="w-3.5 h-3.5" /> Ocultar</>
+                      <>
+                        <EyeOff className="w-3.5 h-3.5" /> Ocultar
+                      </>
                     ) : (
-                      <><Eye className="w-3.5 h-3.5" /> Ver</>
+                      <>
+                        <Eye className="w-3.5 h-3.5" /> Ver
+                      </>
                     )}
                   </span>
                 )}
@@ -405,23 +406,17 @@ export default function ListingDetailPage() {
                 </button>
 
                 {showShare && (
-                  <div className="mt-2 grid grid-cols-3 gap-2">
+                  <div className="mt-2 grid grid-cols-2 gap-2 justify-center">
                     <button
                       onClick={() => shareOn("facebook")}
-                      className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-card-border hover:bg-blue-50 transition-colors"
+                      className="flex flex-col cursor-pointer items-center gap-1 py-2.5 rounded-xl border border-card-border hover:bg-blue-50 transition-colors"
                     >
                       <Facebook className="w-5 h-5 text-[#1877F2]" />
-                      <span className="text-[10px] text-muted-foreground font-medium">Facebook</span>
-                    </button>
-                    <button
-                      onClick={() => shareOn("instagram")}
-                      className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-card-border hover:bg-pink-50 transition-colors"
-                    >
-                      <Instagram className="w-5 h-5 text-[#E4405F]" />
                       <span className="text-[10px] text-muted-foreground font-medium">
-                        {copied ? "¡Copiado!" : "Instagram"}
+                        Facebook
                       </span>
                     </button>
+
                     <a
                       href={`https://wa.me/?text=${encodeURIComponent(getShareText())}`}
                       target="_blank"
@@ -429,7 +424,9 @@ export default function ListingDetailPage() {
                       className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-card-border hover:bg-green-50 transition-colors"
                     >
                       <MessageCircle className="w-5 h-5 text-[#25D366]" />
-                      <span className="text-[10px] text-muted-foreground font-medium">WhatsApp</span>
+                      <span className="text-[10px] text-muted-foreground font-medium">
+                        WhatsApp
+                      </span>
                     </a>
                   </div>
                 )}
