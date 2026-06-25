@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, listingsTable, paymentsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { FEATURE_PRICE } from "@workspace/api-zod";
 
 const router = Router();
 
@@ -101,7 +102,7 @@ router.post("/create-preference", requireAuth, async (req, res) => {
           title: `Destacar anuncio: ${listing.title}`,
           description: `Destacar "${listing.title}" por 30 días`,
           quantity: 1,
-          unit_price: 18,
+          unit_price: FEATURE_PRICE,
           currency_id: "PEN",
         },
       ],
@@ -120,7 +121,7 @@ router.post("/create-preference", requireAuth, async (req, res) => {
     await db.insert(paymentsTable).values({
       listingId,
       userId,
-      amount: "18.00",
+      amount: String(FEATURE_PRICE) + ".00",
       status: "pending",
       mpPreferenceId: result.id,
       externalReference,

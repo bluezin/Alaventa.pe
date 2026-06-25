@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth, useUser, useClerk } from "@clerk/react";
+import { FEATURE_PRICE_LABEL } from "@workspace/api-zod";
 import {
   useGetMyProfile,
   useGetMyListings,
@@ -92,7 +93,9 @@ export default function DashboardPage() {
     } else if (payment === "rejected") {
       toast.error("El pago fue rechazado. Intenta de nuevo.");
     } else if (payment === "pending") {
-      toast.info("El pago está pendiente. Te notificaremos cuando se confirme.");
+      toast.info(
+        "El pago está pendiente. Te notificaremos cuando se confirme.",
+      );
     } else if (payment === "error") {
       toast.error("Ocurrió un error al procesar el pago.");
     }
@@ -156,8 +159,14 @@ export default function DashboardPage() {
       qc.setQueryData<Listing[]>(getGetMyListingsQueryKey(), (old) =>
         old?.filter((l) => l.id !== id),
       );
-      qc.invalidateQueries({ queryKey: getGetListingsQueryKey(), refetchType: "all" });
-      qc.invalidateQueries({ queryKey: getGetMyListingsQueryKey(), refetchType: "all" });
+      qc.invalidateQueries({
+        queryKey: getGetListingsQueryKey(),
+        refetchType: "all",
+      });
+      qc.invalidateQueries({
+        queryKey: getGetMyListingsQueryKey(),
+        refetchType: "all",
+      });
     } catch {
       alert("Error al eliminar el anuncio. Intenta de nuevo.");
     } finally {
@@ -167,7 +176,9 @@ export default function DashboardPage() {
 
   async function handleFeature(id: number) {
     if (
-      !confirm("Destacar este anuncio por S/ 18 por 30 días. ¿Continuar?")
+      !confirm(
+        `Destacar este anuncio por ${FEATURE_PRICE_LABEL} por 30 días. ¿Continuar?`,
+      )
     )
       return;
     setActionLoading(id);
@@ -253,7 +264,9 @@ export default function DashboardPage() {
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-[20px] sm:text-2xl font-bold text-foreground">Mi cuenta</h1>
+          <h1 className="text-[20px] sm:text-2xl font-bold text-foreground">
+            Mi cuenta
+          </h1>
           <button
             onClick={() => navigate("/publish")}
             className="flex items-center gap-2 p-2 sm:px-4 sm:py-2 rounded-full bg-accent text-primary-foreground text-sm font-bold hover:opacity-90 transition-opacity"
@@ -455,262 +468,271 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {(myListings ?? []).filter((l) => l.status !== "deleted").map((listing) => {
-                  const expiry = listing.expiresAt
-                    ? new Date(listing.expiresAt)
-                    : null;
-                  const daysLeft = expiry
-                    ? differenceInDays(expiry, new Date())
-                    : null;
-                  const isExpiring =
-                    daysLeft !== null &&
-                    daysLeft <= 7 &&
-                    listing.status === "active";
-                  const isExpired = listing.status === "expired";
-                  const loading = actionLoading === listing.id;
-                  const isEditing = editState?.listingId === listing.id;
+                {(myListings ?? [])
+                  .filter((l) => l.status !== "deleted")
+                  .map((listing) => {
+                    const expiry = listing.expiresAt
+                      ? new Date(listing.expiresAt)
+                      : null;
+                    const daysLeft = expiry
+                      ? differenceInDays(expiry, new Date())
+                      : null;
+                    const isExpiring =
+                      daysLeft !== null &&
+                      daysLeft <= 7 &&
+                      listing.status === "active";
+                    const isExpired = listing.status === "expired";
+                    const loading = actionLoading === listing.id;
+                    const isEditing = editState?.listingId === listing.id;
 
-                  return (
-                    <div
-                      key={listing.id}
-                      className={`bg-card rounded-xl border transition-all ${
-                        isEditing
-                          ? "border-primary/50 ring-2 ring-primary/10"
-                          : isExpiring
-                            ? "border-amber-300 bg-amber-50/50"
-                            : isExpired
-                              ? "border-destructive/20 opacity-75"
-                              : "border-card-border"
-                      }`}
-                    >
-                      {/* Listing header row */}
-                      <div className="p-4">
-                        <div className="flex gap-3">
-                          <Link href={`/listings/${listing.id}`}>
-                            <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0">
-                              {listing.imageUrls?.[0] ? (
-                                <img
-                                  src={listing.imageUrls[0]}
-                                  alt={listing.title}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
-                                  <Package className="w-8 h-8" />
-                                </div>
-                              )}
-                            </div>
-                          </Link>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <Link href={`/listings/${listing.id}`}>
-                                <h3 className="font-semibold text-foreground text-sm hover:text-primary transition-colors line-clamp-1">
-                                  {listing.title}
-                                </h3>
-                              </Link>
-                              <div className="flex items-center gap-1 shrink-0">
-                                {listing.isFeatured && (
-                                  <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-full">
-                                    <Star className="w-2.5 h-2.5 fill-amber-600" />{" "}
-                                    Destacado
-                                  </span>
+                    return (
+                      <div
+                        key={listing.id}
+                        className={`bg-card rounded-xl border transition-all ${
+                          isEditing
+                            ? "border-primary/50 ring-2 ring-primary/10"
+                            : isExpiring
+                              ? "border-amber-300 bg-amber-50/50"
+                              : isExpired
+                                ? "border-destructive/20 opacity-75"
+                                : "border-card-border"
+                        }`}
+                      >
+                        {/* Listing header row */}
+                        <div className="p-4">
+                          <div className="flex gap-3">
+                            <Link href={`/listings/${listing.id}`}>
+                              <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0">
+                                {listing.imageUrls?.[0] ? (
+                                  <img
+                                    src={listing.imageUrls[0]}
+                                    alt={listing.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                                    <Package className="w-8 h-8" />
+                                  </div>
                                 )}
-                                <span
-                                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                                    isExpired
-                                      ? "bg-red-100 text-red-600"
+                              </div>
+                            </Link>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <Link href={`/listings/${listing.id}`}>
+                                  <h3 className="font-semibold text-foreground text-sm hover:text-primary transition-colors line-clamp-1">
+                                    {listing.title}
+                                  </h3>
+                                </Link>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  {listing.isFeatured && (
+                                    <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-full">
+                                      <Star className="w-2.5 h-2.5 fill-amber-600" />{" "}
+                                      Destacado
+                                    </span>
+                                  )}
+                                  <span
+                                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                                      isExpired
+                                        ? "bg-red-100 text-red-600"
+                                        : isExpiring
+                                          ? "bg-amber-100 text-amber-700"
+                                          : "bg-green-100 text-green-700"
+                                    }`}
+                                  >
+                                    {isExpired
+                                      ? "Vencido"
                                       : isExpiring
-                                        ? "bg-amber-100 text-amber-700"
-                                        : "bg-green-100 text-green-700"
-                                  }`}
-                                >
-                                  {isExpired
-                                    ? "Vencido"
-                                    : isExpiring
-                                      ? `Vence en ${daysLeft}d`
-                                      : "Activo"}
-                                </span>
+                                        ? `Vence en ${daysLeft}d`
+                                        : "Activo"}
+                                  </span>
+                                </div>
+                              </div>
+                              <p className="font-bold text-primary text-sm mt-1">
+                                {listing.price != null
+                                  ? `S/ ${Number(listing.price).toLocaleString("es-PE")}`
+                                  : "A convenir"}
+                              </p>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                <Clock className="w-3 h-3" />
+                                {expiry
+                                  ? format(expiry, "d MMM yyyy", { locale: es })
+                                  : "—"}
                               </div>
                             </div>
-                            <p className="font-bold text-primary text-sm mt-1">
-                              {listing.price != null
-                                ? `S/ ${Number(listing.price).toLocaleString("es-PE")}`
-                                : "A convenir"}
-                            </p>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                              <Clock className="w-3 h-3" />
-                              {expiry
-                                ? format(expiry, "d MMM yyyy", { locale: es })
-                                : "—"}
-                            </div>
                           </div>
-                        </div>
 
-                        {/* Action buttons */}
-                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border flex-wrap">
-                          {/* Edit button */}
-                          <button
-                            onClick={() =>
-                              isEditing
-                                ? cancelEditListing()
-                                : startEditListing(listing)
-                            }
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
-                              isEditing
-                                ? "border-white bg-accent text-white"
-                                : "border-border text-foreground hover:bg-muted"
-                            }`}
-                          >
-                            {isEditing ? (
-                              <ChevronUp className="w-3 h-3" />
-                            ) : (
-                              <Edit3 className="w-3 h-3" />
-                            )}
-                            {isEditing ? "Cerrar" : "Editar"}
-                          </button>
-
-                          {(isExpiring || isExpired) && (
+                          {/* Action buttons */}
+                          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border flex-wrap">
+                            {/* Edit button */}
                             <button
-                              onClick={() => handleRenew(listing.id)}
-                              disabled={loading}
-                              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60"
+                              onClick={() =>
+                                isEditing
+                                  ? cancelEditListing()
+                                  : startEditListing(listing)
+                              }
+                              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
+                                isEditing
+                                  ? "border-white bg-accent text-white"
+                                  : "border-border text-foreground hover:bg-muted"
+                              }`}
                             >
-                              <RefreshCw className="w-3 h-3" /> Renovar (gratis)
+                              {isEditing ? (
+                                <ChevronUp className="w-3 h-3" />
+                              ) : (
+                                <Edit3 className="w-3 h-3" />
+                              )}
+                              {isEditing ? "Cerrar" : "Editar"}
                             </button>
-                          )}
-                          {!listing.isFeatured &&
-                            listing.status === "active" && (
+
+                            {(isExpiring || isExpired) && (
                               <button
-                                onClick={() => handleFeature(listing.id)}
+                                onClick={() => handleRenew(listing.id)}
                                 disabled={loading}
-                                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-amber-400 text-amber-700 text-xs font-semibold hover:bg-amber-50 disabled:opacity-60"
+                                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60"
                               >
-                                <Star className="w-3 h-3" /> Destacar S/ 18
+                                <RefreshCw className="w-3 h-3" /> Renovar
+                                (gratis)
                               </button>
                             )}
-                          <button
-                            onClick={() => handleDelete(listing.id)}
-                            disabled={loading}
-                            className="ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg border border-destructive/30 text-destructive text-xs font-semibold hover:bg-destructive/10 disabled:opacity-60"
-                          >
-                            <Trash2 className="w-3 h-3" /> Eliminar
-                          </button>
+                            {!listing.isFeatured &&
+                              listing.status === "active" && (
+                                <button
+                                  onClick={() => handleFeature(listing.id)}
+                                  disabled={loading}
+                                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-amber-400 text-amber-700 text-xs font-semibold hover:bg-amber-50 disabled:opacity-60"
+                                >
+                                  <Star className="w-3 h-3" /> Destacar{" "}
+                                  {FEATURE_PRICE_LABEL}
+                                </button>
+                              )}
+                            <button
+                              onClick={() => handleDelete(listing.id)}
+                              disabled={loading}
+                              className="ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg border border-destructive/30 text-destructive text-xs font-semibold hover:bg-destructive/10 disabled:opacity-60"
+                            >
+                              <Trash2 className="w-3 h-3" /> Eliminar
+                            </button>
+                          </div>
                         </div>
+
+                        {/* Inline edit panel */}
+                        {isEditing && editState && (
+                          <div className="border-t border-border bg-muted/30 p-4 space-y-4 rounded-b-xl">
+                            <h4 className="font-semibold text-foreground text-sm">
+                              Editar anuncio
+                            </h4>
+
+                            {/* Titulo */}
+                            <div>
+                              <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
+                                <FileText className="w-3.5 h-3.5" /> Titulo
+                              </label>
+                              <input
+                                value={editState.title}
+                                onChange={(e) =>
+                                  setEditState({
+                                    ...editState,
+                                    title: e.target.value,
+                                  })
+                                }
+                                maxLength={50}
+                                className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                              />
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {editState.description.length}/50
+                              </p>
+                            </div>
+                            {/* Precio */}
+                            <div>
+                              <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
+                                <FileText className="w-3.5 h-3.5" /> Precio
+                              </label>
+                              <input
+                                value={editState.price}
+                                min="0"
+                                step="0.01"
+                                onChange={(e) =>
+                                  setEditState({
+                                    ...editState,
+                                    price: Number(e.target.value),
+                                  })
+                                }
+                                type="number"
+                                className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                              />
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {editState.description.length}/50
+                              </p>
+                            </div>
+                            {/* Description */}
+                            <div>
+                              <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
+                                <FileText className="w-3.5 h-3.5" /> Descripción
+                              </label>
+                              <textarea
+                                value={editState.description}
+                                onChange={(e) =>
+                                  setEditState({
+                                    ...editState,
+                                    description: e.target.value,
+                                  })
+                                }
+                                rows={5}
+                                maxLength={2000}
+                                className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                              />
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {editState.description.length}/2000
+                              </p>
+                            </div>
+
+                            {/* Photos */}
+                            <div>
+                              <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
+                                Fotos
+                              </label>
+                              <ImageUpload
+                                imageUrls={editState.imageUrls.filter(Boolean)}
+                                onChange={(urls) =>
+                                  setEditState({
+                                    ...editState,
+                                    imageUrls: urls,
+                                  })
+                                }
+                                getToken={getToken}
+                              />
+                            </div>
+
+                            {editError && (
+                              <p className="text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
+                                {editError}
+                              </p>
+                            )}
+
+                            <div className="flex gap-2 pt-1">
+                              <button
+                                onClick={saveEditListing}
+                                disabled={editSaving}
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent text-primary-foreground text-sm font-semibold hover:opacity-90 disabled:opacity-60"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                                {editSaving
+                                  ? "Guardando..."
+                                  : "Guardar cambios"}
+                              </button>
+                              <button
+                                onClick={cancelEditListing}
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:bg-muted"
+                              >
+                                <X className="w-3.5 h-3.5" /> Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-
-                      {/* Inline edit panel */}
-                      {isEditing && editState && (
-                        <div className="border-t border-border bg-muted/30 p-4 space-y-4 rounded-b-xl">
-                          <h4 className="font-semibold text-foreground text-sm">
-                            Editar anuncio
-                          </h4>
-
-                          {/* Titulo */}
-                          <div>
-                            <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
-                              <FileText className="w-3.5 h-3.5" /> Titulo
-                            </label>
-                            <input
-                              value={editState.title}
-                              onChange={(e) =>
-                                setEditState({
-                                  ...editState,
-                                  title: e.target.value,
-                                })
-                              }
-                              maxLength={50}
-                              className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
-                            />
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {editState.description.length}/50
-                            </p>
-                          </div>
-                          {/* Precio */}
-                          <div>
-                            <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
-                              <FileText className="w-3.5 h-3.5" /> Precio
-                            </label>
-                            <input
-                              value={editState.price}
-                              min="0"
-                              step="0.01"
-                              onChange={(e) =>
-                                setEditState({
-                                  ...editState,
-                                  price: Number(e.target.value),
-                                })
-                              }
-                              type="number"
-                              className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
-                            />
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {editState.description.length}/50
-                            </p>
-                          </div>
-                          {/* Description */}
-                          <div>
-                            <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
-                              <FileText className="w-3.5 h-3.5" /> Descripción
-                            </label>
-                            <textarea
-                              value={editState.description}
-                              onChange={(e) =>
-                                setEditState({
-                                  ...editState,
-                                  description: e.target.value,
-                                })
-                              }
-                              rows={5}
-                              maxLength={2000}
-                              className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
-                            />
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {editState.description.length}/2000
-                            </p>
-                          </div>
-
-                          {/* Photos */}
-                          <div>
-                            <label className="flex items-center gap-1.5 text-xs font-medium text-foreground mb-1.5">
-                              Fotos
-                            </label>
-                            <ImageUpload
-                              imageUrls={editState.imageUrls.filter(Boolean)}
-                              onChange={(urls) =>
-                                setEditState({ ...editState, imageUrls: urls })
-                              }
-                              getToken={getToken}
-                            />
-                          </div>
-
-                          {editError && (
-                            <p className="text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
-                              {editError}
-                            </p>
-                          )}
-
-                          <div className="flex gap-2 pt-1">
-                            <button
-                              onClick={saveEditListing}
-                              disabled={editSaving}
-                              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent text-primary-foreground text-sm font-semibold hover:opacity-90 disabled:opacity-60"
-                            >
-                              <Check className="w-3.5 h-3.5" />
-                              {editSaving ? "Guardando..." : "Guardar cambios"}
-                            </button>
-                            <button
-                              onClick={cancelEditListing}
-                              className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:bg-muted"
-                            >
-                              <X className="w-3.5 h-3.5" /> Cancelar
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             )}
           </div>

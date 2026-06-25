@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import { useAuth } from "@clerk/react";
+import { FEATURE_PRICE_LABEL } from "@workspace/api-zod";
 import { useGetListing, useGetListings } from "@workspace/api-client-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -439,7 +440,7 @@ export default function ListingDetailPage() {
                   onClick={async () => {
                     if (
                       !confirm(
-                        "Destacar este anuncio por S/ 18 por 30 días. ¿Continuar?",
+                        `Destacar este anuncio por ${FEATURE_PRICE_LABEL} por 30 días. ¿Continuar?`,
                       )
                     )
                       return;
@@ -471,7 +472,7 @@ export default function ListingDetailPage() {
                   className="w-full mt-4 cursor-pointer flex items-center justify-center gap-2 py-3 rounded-xl border border-amber-400 text-amber-700 text-sm font-semibold hover:bg-amber-50 disabled:opacity-60 transition-colors mb-3"
                 >
                   <Star className="w-4 h-4" />
-                  {featureLoading ? "Procesando..." : "Destacar S/ 18"}
+                  {featureLoading ? "Procesando..." : `Destacar ${FEATURE_PRICE_LABEL}`}
                 </button>
               )}
 
