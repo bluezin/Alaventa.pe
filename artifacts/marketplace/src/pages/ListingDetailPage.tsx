@@ -290,6 +290,20 @@ export default function ListingDetailPage() {
                 {listing.description || "Sin descripción."}
               </p>
             </div>
+
+            {/* Related listings (mobile only) */}
+            {relatedListings.length > 0 && (
+              <div className="mt-6 md:hidden">
+                <h2 className="text-lg font-bold text-foreground mb-4">
+                  Anuncios relacionados
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  {relatedListings.map((rel) => (
+                    <ListingCard key={rel.id} listing={rel} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── RIGHT COLUMN ── */}
@@ -511,22 +525,22 @@ export default function ListingDetailPage() {
                 <li>• Desconfía de precios muy bajos</li>
               </ul>
             </div>
+
+            {/* Related listings (desktop only) */}
+            {relatedListings.length > 0 && (
+              <div className="hidden md:block">
+                <h2 className="text-lg font-bold text-foreground mb-4">
+                  Anuncios relacionados
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  {relatedListings.map((rel) => (
+                    <ListingCard key={rel.id} listing={rel} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* ── RELATED LISTINGS ── */}
-        {relatedListings.length > 0 && (
-          <div className="mt-10">
-            <h2 className="text-lg font-bold text-foreground mb-4">
-              Anuncios relacionados
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {relatedListings.map((rel) => (
-                <ListingCard key={rel.id} listing={rel} />
-              ))}
-            </div>
-          </div>
-        )}
       </div>
       <Footer />
     </div>

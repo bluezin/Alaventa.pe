@@ -11,6 +11,8 @@ const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:3000";
 
 const MP_API = "https://api.mercadopago.com";
 
+const USE_SANDBOX = process.env.MERCADO_PAGO_SANDBOX === "true";
+
 /**
  * Mercado Pago fetch seguro
  */
@@ -110,7 +112,7 @@ router.post("/create-preference", requireAuth, async (req, res) => {
       notification_url: `${BACKEND_URL}/api/payments/webhook`,
     });
 
-    if (!result.id || !result.sandbox_init_point) {
+    if (!result.id || !(USE_SANDBOX ? result.sandbox_init_point : result.init_point)) {
       res.status(500).json({ error: "Failed to create MP preference" });
       return;
     }
@@ -125,7 +127,7 @@ router.post("/create-preference", requireAuth, async (req, res) => {
     });
 
     res.json({
-      initPoint: result.sandbox_init_point,
+      initPoint: USE_SANDBOX ? result.sandbox_init_point : result.init_point,
       preferenceId: result.id,
     });
   } catch (err: any) {
