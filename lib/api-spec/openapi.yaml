@@ -16,8 +16,7 @@ tags:
     description: Category operations
   - name: users
     description: User profile operations
-  - name: featured
-    description: Featured listing operations
+
 paths:
   /healthz:
     get:
@@ -169,31 +168,6 @@ paths:
       responses:
         "200":
           description: Renewed listing
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Listing"
-
-  /listings/{id}/feature:
-    post:
-      operationId: featureListing
-      tags: [listings]
-      summary: Mark listing as featured (pay 29 soles)
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/FeatureInput"
-      responses:
-        "200":
-          description: Featured listing
           content:
             application/json:
               schema:
@@ -428,13 +402,6 @@ components:
           type: integer
         hasMore:
           type: boolean
-
-    FeatureInput:
-      type: object
-      required: [paymentReference]
-      properties:
-        paymentReference:
-          type: string
 
     UserProfile:
       type: object

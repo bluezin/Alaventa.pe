@@ -3,7 +3,6 @@ import { useSearch, useLocation } from "wouter";
 import {
   useGetListings,
   useGetCategories,
-  useGetListingStats,
 } from "@workspace/api-client-react";
 import SEOHead from "../components/SEOHead";
 import Navbar from "../components/Navbar";
@@ -58,7 +57,6 @@ export default function HomePage() {
     limit: 24,
   });
   const { data: categories } = useGetCategories();
-  const { data: stats } = useGetListingStats();
 
   function handleSearch(q: string) {
     const p = new URLSearchParams();

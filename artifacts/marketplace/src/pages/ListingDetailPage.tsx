@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useLocation, Link } from "wouter";
+import { useAuth } from "@clerk/react";
 import { useGetListing, useGetListings } from "@workspace/api-client-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -51,6 +52,9 @@ export default function ListingDetailPage() {
   const [showPhone, setShowPhone] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [featureLoading, setFeatureLoading] = useState(false);
+  const { userId, getToken } = useAuth();
+  const isOwner = !!userId && userId === listing?.userId;
 
   const { data: relatedData } = useGetListings(
     { category: listing?.categorySlug, limit: 5 },
@@ -256,7 +260,7 @@ export default function ListingDetailPage() {
 
             {/* Thumbnails */}
             {images.length > 1 && (
-              <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+              <div className="flex gap-2 mb-4 overflow-x-auto pb-1 justify-center flex-wrap">
                 {images.map((img, i) => (
                   <button
                     key={i}
@@ -292,9 +296,18 @@ export default function ListingDetailPage() {
           <div className="space-y-4">
             {/* Info card */}
             <div className="bg-card rounded-2xl border border-card-border p-5 shadow-sm">
-              <span className="inline-block text-xs font-medium text-white bg-accent px-2.5 py-1 rounded-full mb-3">
-                {listing.categoryName}
-              </span>
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <span className="inline-block text-xs font-medium text-white bg-accent px-2.5 py-1 rounded-full">
+                  {listing.categoryName}
+                </span>
+
+                {listing.isFeatured && (
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full">
+                    <Star className="w-3 h-3 fill-amber-700" />
+                    Destacado
+                  </span>
+                )}
+              </div>
 
               <h1 className="text-xl font-bold text-foreground mb-2 leading-snug">
                 {listing.title}
@@ -384,16 +397,68 @@ export default function ListingDetailPage() {
               </button>
 
               {/* WhatsApp */}
-              <a
-                href={listing.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "#25D366" }}
-              >
-                <MessageCircle className="w-5 h-5" />
-                Contactar por WhatsApp
-              </a>
+              {userId ? (
+                <a
+                  href={listing.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "#25D366" }}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Contactar por WhatsApp
+                </a>
+              ) : (
+                <button
+                  disabled
+                  className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-bold text-white opacity-50 cursor-not-allowed"
+                  style={{ backgroundColor: "#25D366" }}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Inicia sesión para contactar
+                </button>
+              )}
+
+              {/* Feature button (owner only) */}
+              {isOwner && !listing.isFeatured && (
+                <button
+                  onClick={async () => {
+                    if (
+                      !confirm(
+                        "Destacar este anuncio por S/ 18 por 30 días. ¿Continuar?",
+                      )
+                    )
+                      return;
+                    setFeatureLoading(true);
+                    try {
+                      const token = await getToken();
+                      const res = await fetch(
+                        "/api/payments/create-preference",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                          },
+                          body: JSON.stringify({ listingId: id }),
+                        },
+                      );
+                      const data = await res.json();
+                      if (data.initPoint) {
+                        window.location.href = data.initPoint;
+                      }
+                    } catch {
+                    } finally {
+                      setFeatureLoading(false);
+                    }
+                  }}
+                  disabled={featureLoading}
+                  className="w-full mt-4 cursor-pointer flex items-center justify-center gap-2 py-3 rounded-xl border border-amber-400 text-amber-700 text-sm font-semibold hover:bg-amber-50 disabled:opacity-60 transition-colors mb-3"
+                >
+                  <Star className="w-4 h-4" />
+                  {featureLoading ? "Procesando..." : "Destacar S/ 18"}
+                </button>
+              )}
 
               {/* Share */}
               <div className="mt-3">

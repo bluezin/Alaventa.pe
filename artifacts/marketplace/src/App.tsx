@@ -1,18 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
-import {
-  Switch,
-  Route,
-  Router as WouterRouter,
-  useLocation,
-  Redirect,
-} from "wouter";
-import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
-import { ClerkProvider, SignIn, SignUp, useClerk, useAuth, Show } from "@clerk/react";
+import { ClerkProvider, SignIn, SignUp, useAuth } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { shadcn } from "@clerk/themes";
+import { esES } from "@clerk/localizations";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { queryClient } from "./lib/api";
@@ -24,9 +19,10 @@ import ListingDetailPage from "./pages/ListingDetailPage";
 import PublishPage from "./pages/PublishPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
-import PoliciesPage from "./pages/PoliciesPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import NotFound from "./pages/NotFound";
-//
+
 const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
   import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
@@ -96,7 +92,10 @@ function SignInPage() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
       <div className="flex flex-col items-center w-full max-w-md gap-3">
-        <Link href="/" className="self-start flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <Link
+          href="/"
+          className="self-start flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
           <ArrowLeft className="w-4 h-4" />
           Volver al inicio
         </Link>
@@ -115,10 +114,34 @@ function SignUpPage() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
       <div className="flex flex-col items-center w-full max-w-md gap-3">
-        <Link href="/" className="self-start flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <Link
+          href="/"
+          className="self-start flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
           <ArrowLeft className="w-4 h-4" />
           Volver al inicio
         </Link>
+        <p className="text-xs text-center text-muted-foreground leading-relaxed">
+          Al registrarte aceptas nuestros
+          <br />
+          <a
+            href="/terminos"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline hover:text-primary/80 font-medium"
+          >
+            Términos y condiciones
+          </a>{" "}
+          y{" "}
+          <a
+            href="/privacidad"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline hover:text-primary/80 font-medium"
+          >
+            Política de privacidad
+          </a>
+        </p>
         <SignUp
           routing="path"
           path={`${basePath}/sign-up`}
@@ -159,7 +182,8 @@ function Router() {
       <Route path="/publish" component={PublishPage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/profile/:userId" component={ProfilePage} />
-      <Route path="/politicas" component={PoliciesPage} />
+      <Route path="/terminos" component={TermsPage} />
+      <Route path="/privacidad" component={PrivacyPage} />
       <Route path="/sign-in/*?" component={SignInPage} />
       <Route path="/sign-up/*?" component={SignUpPage} />
       <Route component={NotFound} />
@@ -178,19 +202,25 @@ function ClerkProviderWithRoutes() {
       signInUrl={`${basePath}/sign-in`}
       signUpUrl={`${basePath}/sign-up`}
       localization={{
+        ...esES,
         signIn: {
+          ...esES.signIn,
           start: {
+            ...esES.signIn?.start,
             title: "Ingresar a Alaventa",
             subtitle: "Bienvenido de vuelta",
           },
         },
         signUp: {
+          ...esES.signUp,
           start: {
+            ...esES.signUp?.start,
             title: "Crear cuenta en Alaventa",
             subtitle: "Gratis, rápido y seguro",
           },
         },
         userButton: {
+          ...esES.userButton,
           action__signOut: "Cerrar sesión",
         },
       }}

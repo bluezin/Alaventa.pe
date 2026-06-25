@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth, useUser, useClerk } from "@clerk/react";
 import {
@@ -8,7 +8,6 @@ import {
   useUpdateMyProfile,
   useRenewListing,
   useDeleteListing,
-  useFeatureListing,
   useUpdateListing,
   getGetMyProfileQueryKey,
   getGetMyListingsQueryKey,
@@ -16,6 +15,7 @@ import {
   getGetListingsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ImageUpload from "../components/ImageUpload";
@@ -67,7 +67,6 @@ export default function DashboardPage() {
   const updateProfile = useUpdateMyProfile();
   const renewListing = useRenewListing();
   const deleteListing = useDeleteListing();
-  const featureListing = useFeatureListing();
   const updateListing = useUpdateListing();
 
   const [editingProfile, setEditingProfile] = useState(false);
@@ -79,6 +78,25 @@ export default function DashboardPage() {
   const [editState, setEditState] = useState<EditState | null>(null);
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get("payment");
+    const listingId = params.get("listingId");
+    if (payment === "success") {
+      toast.success("¡Pago exitoso! Tu anuncio ahora está destacado.");
+      qc.invalidateQueries({ queryKey: getGetMyListingsQueryKey() });
+      if (listingId) {
+        navigate(`/dashboard`, { replace: true });
+      }
+    } else if (payment === "rejected") {
+      toast.error("El pago fue rechazado. Intenta de nuevo.");
+    } else if (payment === "pending") {
+      toast.info("El pago está pendiente. Te notificaremos cuando se confirme.");
+    } else if (payment === "error") {
+      toast.error("Ocurrió un error al procesar el pago.");
+    }
+  }, []);
 
   if (!isSignedIn) {
     return (
@@ -149,17 +167,28 @@ export default function DashboardPage() {
 
   async function handleFeature(id: number) {
     if (
-      !confirm("Destacar este anuncio por S/ 29 soles por 30 días. ¿Continuar?")
+      !confirm("Destacar este anuncio por S/ 18 por 30 días. ¿Continuar?")
     )
       return;
     setActionLoading(id);
     try {
-      await featureListing.mutateAsync({
-        id,
-        data: { paymentReference: `PAY_${Date.now()}` },
+      const token = await getToken();
+      const res = await fetch("/api/payments/create-preference", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ listingId: id }),
       });
-      qc.invalidateQueries({ queryKey: getGetMyListingsQueryKey() });
+      const data = await res.json();
+      if (data.initPoint) {
+        window.location.href = data.initPoint;
+      } else {
+        toast.error("Error al iniciar el pago");
+      }
     } catch {
+      toast.error("Error al conectar con el procesador de pagos");
     } finally {
       setActionLoading(null);
     }
@@ -556,7 +585,7 @@ export default function DashboardPage() {
                                 disabled={loading}
                                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-amber-400 text-amber-700 text-xs font-semibold hover:bg-amber-50 disabled:opacity-60"
                               >
-                                <Star className="w-3 h-3" /> Destacar S/ 29
+                                <Star className="w-3 h-3" /> Destacar S/ 18
                               </button>
                             )}
                           <button

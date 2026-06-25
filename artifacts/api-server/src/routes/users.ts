@@ -90,6 +90,21 @@ router.post("/me/sync", requireAuth, async (req, res) => {
   }
 });
 
+router.post("/me/accept-terms", requireAuth, async (req, res) => {
+  try {
+    const userId = (req as any).userId as string;
+    const [updated] = await db
+      .update(usersTable)
+      .set({ termsAcceptedAt: new Date() })
+      .where(eq(usersTable.clerkId, userId))
+      .returning();
+    res.json({ accepted: true, termsAcceptedAt: updated.termsAcceptedAt });
+  } catch (err) {
+    req.log.error(err, "Failed to accept terms");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.get("/me/listings", requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId as string;

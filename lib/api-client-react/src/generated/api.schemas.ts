@@ -86,10 +86,6 @@ export interface ListingsPage {
   hasMore?: boolean;
 }
 
-export interface FeatureInput {
-  paymentReference: string;
-}
-
 export interface UserProfile {
   id: number;
   clerkId: string;

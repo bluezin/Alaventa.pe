@@ -203,41 +203,6 @@ export const RenewListingResponse = zod.object({
 
 
 /**
- * @summary Mark listing as featured (pay 29 soles)
- */
-export const FeatureListingParams = zod.object({
-  "id": zod.coerce.number()
-})
-
-export const FeatureListingBody = zod.object({
-  "paymentReference": zod.string()
-})
-
-export const FeatureListingResponse = zod.object({
-  "id": zod.number(),
-  "title": zod.string(),
-  "description": zod.string(),
-  "price": zod.number().nullable(),
-  "currency": zod.string().optional(),
-  "categoryId": zod.number(),
-  "categoryName": zod.string(),
-  "categorySlug": zod.string().optional(),
-  "userId": zod.string(),
-  "userName": zod.string().optional(),
-  "userPhone": zod.string(),
-  "userAvatarUrl": zod.string().nullish(),
-  "imageUrls": zod.array(zod.string()).optional(),
-  "location": zod.string().nullish(),
-  "status": zod.enum(['active', 'expired', 'deleted']),
-  "isFeatured": zod.boolean(),
-  "featuredUntil": zod.string().nullish(),
-  "expiresAt": zod.string(),
-  "createdAt": zod.string(),
-  "whatsappUrl": zod.string().optional()
-})
-
-
-/**
  * @summary Get current user profile
  */
 export const GetMyProfileResponse = zod.object({

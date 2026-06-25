@@ -21,7 +21,6 @@ import type {
 
 import type {
   Category,
-  FeatureInput,
   GetListingsParams,
   HealthStatus,
   Listing,
@@ -641,78 +640,6 @@ export const useRenewListing = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getRenewListingMutationOptions(options));
-    }
-
-export const getFeatureListingUrl = (id: number,) => {
-
-
-
-
-  return `/api/listings/${id}/feature`
-}
-
-/**
- * @summary Mark listing as featured (pay 29 soles)
- */
-export const featureListing = async (id: number,
-    featureInput: FeatureInput, options?: RequestInit): Promise<Listing> => {
-
-  return customFetch<Listing>(getFeatureListingUrl(id),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      featureInput,)
-  }
-);}
-
-
-
-
-export const getFeatureListingMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof featureListing>>, TError,{id: number;data: BodyType<FeatureInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof featureListing>>, TError,{id: number;data: BodyType<FeatureInput>}, TContext> => {
-
-const mutationKey = ['featureListing'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof featureListing>>, {id: number;data: BodyType<FeatureInput>}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  featureListing(id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type FeatureListingMutationResult = NonNullable<Awaited<ReturnType<typeof featureListing>>>
-    export type FeatureListingMutationBody = BodyType<FeatureInput>
-    export type FeatureListingMutationError = ErrorType<unknown>
-
-    /**
- * @summary Mark listing as featured (pay 29 soles)
- */
-export const useFeatureListing = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof featureListing>>, TError,{id: number;data: BodyType<FeatureInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof featureListing>>,
-        TError,
-        {id: number;data: BodyType<FeatureInput>},
-        TContext
-      > => {
-      return useMutation(getFeatureListingMutationOptions(options));
     }
 
 export const getGetMyProfileUrl = () => {

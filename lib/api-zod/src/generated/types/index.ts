@@ -8,7 +8,6 @@
 
 export * from './category';
 export * from './categoryCount';
-export * from './featureInput';
 export * from './getListingsParams';
 export * from './healthStatus';
 export * from './listing';

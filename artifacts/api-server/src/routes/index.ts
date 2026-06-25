@@ -3,6 +3,7 @@ import healthRouter from "./health";
 import categoriesRouter from "./categories";
 import listingsRouter from "./listings";
 import usersRouter from "./users";
+import paymentsRouter from "./payments";
 
 const router: IRouter = Router();
 
@@ -10,5 +11,6 @@ router.use(healthRouter);
 router.use("/categories", categoriesRouter);
 router.use("/listings", listingsRouter);
 router.use("/users", usersRouter);
+router.use("/payments", paymentsRouter);
 
 export default router;

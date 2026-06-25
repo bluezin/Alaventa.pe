@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, listingsTable, categoriesTable, usersTable } from "@workspace/db";
 import { eq, and, or, ilike, desc, asc, sql, count, lte, gte } from "drizzle-orm";
 import { requireAuth, optionalAuth } from "../middlewares/auth";
-import { CreateListingBody, UpdateListingBody, FeatureListingBody } from "@workspace/api-zod";
+import { CreateListingBody, UpdateListingBody } from "@workspace/api-zod";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getR2Client, getR2Bucket, getR2PublicUrl } from "../lib/r2";
 
@@ -315,35 +315,6 @@ router.post("/:id/renew", requireAuth, async (req, res) => {
     res.json(enriched);
   } catch (err) {
     req.log.error(err, "Failed to renew listing");
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// POST /api/listings/:id/feature
-router.post("/:id/feature", requireAuth, async (req, res) => {
-  try {
-    const userId = (req as any).userId as string;
-    const id = parseInt(`${req.params.id}`);
-    const parsed = FeatureListingBody.safeParse(req.body);
-    if (!parsed.success) {
-      res.status(400).json({ error: "Invalid request" });
-      return;
-    }
-    const rows = await db.select().from(listingsTable).where(and(eq(listingsTable.id, id), eq(listingsTable.userId, userId))).limit(1);
-    if (rows.length === 0) {
-      res.status(404).json({ error: "Not found or unauthorized" });
-      return;
-    }
-    const featuredUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    const [updated] = await db
-      .update(listingsTable)
-      .set({ isFeatured: true, featuredUntil })
-      .where(eq(listingsTable.id, id))
-      .returning();
-    const [enriched] = await enrichListings([updated]);
-    res.json(enriched);
-  } catch (err) {
-    req.log.error(err, "Failed to feature listing");
     res.status(500).json({ error: "Internal server error" });
   }
 });
