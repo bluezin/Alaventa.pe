@@ -33,13 +33,13 @@ function mpFetch(path: string, options?: RequestInit) {
   });
 }
 
-async function mpJson(path: string, body?: unknown) {
+async function mpJson<T = any>(path: string, body?: unknown): Promise<T> {
   const res = await mpFetch(path, {
     method: body ? "POST" : "GET",
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
 
-  const json = await res.json();
+  const json: any = await res.json();
 
   if (!res.ok) {
     const err = new Error(json.message ?? "MP API error");
@@ -95,7 +95,11 @@ router.post("/create-preference", requireAuth, async (req, res) => {
       pending: `${BACKEND_URL}/api/payments/pending`,
     };
 
-    const result = await mpJson("/checkout/preferences", {
+    const result = await mpJson<{
+      id: string;
+      init_point: string;
+      sandbox_init_point: string;
+    }>("/checkout/preferences", {
       items: [
         {
           id: String(listingId),
@@ -153,7 +157,7 @@ router.get("/success", async (req, res) => {
     >;
 
     if (payment_id) {
-      const payment = await mpJson(`/v1/payments/${payment_id}`);
+      const payment = await mpJson<{ status: string; external_reference: string }>(`/v1/payments/${payment_id}`);
       const status = payment.status === "approved" ? "approved" : "rejected";
 
       await db
@@ -241,7 +245,7 @@ router.post("/webhook", async (req, res) => {
     if (type === "payment" && data?.id) {
       const paymentId = data.id;
 
-      const payment = await mpJson(`/v1/payments/${paymentId}`);
+      const payment = await mpJson<{ status: string; external_reference: string }>(`/v1/payments/${paymentId}`);
 
       const externalReference = payment.external_reference;
 
