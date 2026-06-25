@@ -432,8 +432,9 @@ export default function ListingDetailPage() {
                     setFeatureLoading(true);
                     try {
                       const token = await getToken();
+                      const apiBase = import.meta.env.VITE_API_BASE_URL;
                       const res = await fetch(
-                        "/api/payments/create-preference",
+                        `${apiBase}/api/payments/create-preference`,
                         {
                           method: "POST",
                           headers: {

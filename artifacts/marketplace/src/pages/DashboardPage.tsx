@@ -173,7 +173,8 @@ export default function DashboardPage() {
     setActionLoading(id);
     try {
       const token = await getToken();
-      const res = await fetch("/api/payments/create-preference", {
+      const apiBase = import.meta.env.VITE_API_BASE_URL;
+      const res = await fetch(`${apiBase}/api/payments/create-preference`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
