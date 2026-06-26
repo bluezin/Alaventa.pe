@@ -54,6 +54,11 @@ app.use(
       getClerkProxyHost(req) ?? "",
       process.env.CLERK_PUBLISHABLE_KEY,
     ),
+    ignoredRoutes: [
+      "/api/payments/success",
+      "/api/payments/failure",
+      "/api/payments/pending",
+    ],
   })),
 );
 
