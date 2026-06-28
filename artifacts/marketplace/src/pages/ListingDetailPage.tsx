@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
+import PaymentOverlay from "@/components/PaymentOverlay";
 
 function formatPrice(price: number | null | undefined): string {
   if (price == null) return "A convenir";
@@ -447,7 +448,7 @@ export default function ListingDetailPage() {
                     setFeatureLoading(true);
                     try {
                       const token = await getToken();
-                      const apiBase = import.meta.env.VITE_API_BASE_URL;
+                      const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
                       const res = await fetch(
                         `${apiBase}/api/payments/create-preference`,
                         {
@@ -472,9 +473,13 @@ export default function ListingDetailPage() {
                   className="w-full mt-4 cursor-pointer flex items-center justify-center gap-2 py-3 rounded-xl border border-amber-400 text-amber-700 text-sm font-semibold hover:bg-amber-50 disabled:opacity-60 transition-colors mb-3"
                 >
                   <Star className="w-4 h-4" />
-                  {featureLoading ? "Procesando..." : `Destacar ${FEATURE_PRICE_LABEL}`}
+                  {featureLoading
+                    ? "Procesando..."
+                    : `Destacar ${FEATURE_PRICE_LABEL}`}
                 </button>
               )}
+
+              {featureLoading && <PaymentOverlay show={true} />}
 
               {/* Share */}
               <div className="mt-3">

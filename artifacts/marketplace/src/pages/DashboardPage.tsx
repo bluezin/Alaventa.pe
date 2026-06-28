@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ImageUpload from "../components/ImageUpload";
+import PaymentOverlay from "../components/PaymentOverlay";
 import {
   User,
   Phone,
@@ -74,6 +75,7 @@ export default function DashboardPage() {
   const [nameEdit, setNameEdit] = useState("");
   const [phoneEdit, setPhoneEdit] = useState("");
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [showPaymentOverlay, setShowPaymentOverlay] = useState(false);
 
   // Edit listing state
   const [editState, setEditState] = useState<EditState | null>(null);
@@ -182,9 +184,10 @@ export default function DashboardPage() {
     )
       return;
     setActionLoading(id);
+    setShowPaymentOverlay(true);
     try {
       const token = await getToken();
-      const apiBase = import.meta.env.VITE_API_BASE_URL;
+      const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
       const res = await fetch(`${apiBase}/api/payments/create-preference`, {
         method: "POST",
         headers: {
@@ -197,9 +200,11 @@ export default function DashboardPage() {
       if (data.initPoint) {
         window.location.href = data.initPoint;
       } else {
+        setShowPaymentOverlay(false);
         toast.error("Error al iniciar el pago");
       }
     } catch {
+      setShowPaymentOverlay(false);
       toast.error("Error al conectar con el procesador de pagos");
     } finally {
       setActionLoading(null);
@@ -500,7 +505,7 @@ export default function DashboardPage() {
                       >
                         {/* Listing header row */}
                         <div className="p-4">
-                          <div className="flex gap-3">
+                          <div className="flex flex-wrap gap-3">
                             <Link href={`/listings/${listing.id}`}>
                               <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0">
                                 {listing.imageUrls?.[0] ? (
@@ -517,8 +522,8 @@ export default function DashboardPage() {
                               </div>
                             </Link>
 
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                              <div className="flex flex-wrap items-start justify-between gap-2">
                                 <Link href={`/listings/${listing.id}`}>
                                   <h3 className="font-semibold text-foreground text-sm hover:text-primary transition-colors line-clamp-1">
                                     {listing.title}
@@ -739,6 +744,7 @@ export default function DashboardPage() {
         </div>
       </div>
       <Footer />
+      <PaymentOverlay show={showPaymentOverlay} />
     </div>
   );
 }
