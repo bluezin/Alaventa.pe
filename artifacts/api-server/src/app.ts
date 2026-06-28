@@ -10,6 +10,7 @@ import {
 } from "./middlewares/clerkProxyMiddleware";
 import router from "./routes";
 import uploadRouter from "./routes/upload";
+import paymentCallbacksRouter from "./routes/paymentCallbacks";
 import { logger } from "./lib/logger";
 
 const app: Express = express();
@@ -48,17 +49,14 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/api/payments", paymentCallbacksRouter);
+
 app.use(
   clerkMiddleware((req) => ({
     publishableKey: publishableKeyFromHost(
       getClerkProxyHost(req) ?? "",
       process.env.CLERK_PUBLISHABLE_KEY,
     ),
-    ignoredRoutes: [
-      "/api/payments/success",
-      "/api/payments/failure",
-      "/api/payments/pending",
-    ],
   })),
 );
 

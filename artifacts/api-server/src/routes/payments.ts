@@ -3,57 +3,12 @@ import { db, listingsTable, paymentsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { FEATURE_PRICE } from "@workspace/api-zod";
+import { mpJson, USE_SANDBOX } from "../lib/mp";
 
 const router = Router();
 
-const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
-
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:3000";
 
-const MP_API = "https://api.mercadopago.com";
-
-const USE_SANDBOX = process.env.MERCADO_PAGO_SANDBOX === "true";
-
-/**
- * Mercado Pago fetch seguro
- */
-function mpFetch(path: string, options?: RequestInit) {
-  const token = process.env.MERCADO_PAGO_ACCESS_TOKEN;
-
-  if (!token) throw new Error("MERCADO_PAGO_ACCESS_TOKEN not set");
-
-  return fetch(`${MP_API}${path}`, {
-    method: options?.method ?? "POST",
-    body: options?.body,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(options?.headers ?? {}),
-    },
-  });
-}
-
-async function mpJson<T = any>(path: string, body?: unknown): Promise<T> {
-  const res = await mpFetch(path, {
-    method: body ? "POST" : "GET",
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  });
-
-  const json: any = await res.json();
-
-  if (!res.ok) {
-    const err = new Error(json.message ?? "MP API error");
-    (err as any).status = res.status;
-    (err as any).mpError = json;
-    throw err;
-  }
-
-  return json;
-}
-
-/**
- * CREATE PREFERENCE
- */
 router.post("/create-preference", requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId as string;
@@ -89,12 +44,6 @@ router.post("/create-preference", requireAuth, async (req, res) => {
 
     const externalReference = `FEATURE_${listingId}_${Date.now()}`;
 
-    const backUrls = {
-      success: `${BACKEND_URL}/api/payments/success`,
-      failure: `${BACKEND_URL}/api/payments/failure`,
-      pending: `${BACKEND_URL}/api/payments/pending`,
-    };
-
     const result = await mpJson<{
       id: string;
       init_point: string;
@@ -110,10 +59,13 @@ router.post("/create-preference", requireAuth, async (req, res) => {
           currency_id: "PEN",
         },
       ],
-
       external_reference: externalReference,
       auto_return: "approved",
-      back_urls: backUrls,
+      back_urls: {
+        success: `${BACKEND_URL}/api/payments/success`,
+        failure: `${BACKEND_URL}/api/payments/failure`,
+        pending: `${BACKEND_URL}/api/payments/pending`,
+      },
       notification_url: `${BACKEND_URL}/api/payments/webhook`,
     });
 
@@ -146,98 +98,6 @@ router.post("/create-preference", requireAuth, async (req, res) => {
   }
 });
 
-/**
- * SUCCESS
- */
-router.get("/success", async (req, res) => {
-  try {
-    const { payment_id, external_reference } = req.query as Record<
-      string,
-      string
-    >;
-
-    if (payment_id) {
-      const payment = await mpJson<{ status: string; external_reference: string }>(`/v1/payments/${payment_id}`);
-      const status = payment.status === "approved" ? "approved" : "rejected";
-
-      await db
-        .update(paymentsTable)
-        .set({
-          status,
-          mpPaymentId: payment_id,
-        })
-        .where(eq(paymentsTable.externalReference, external_reference));
-
-      if (status === "approved" && external_reference) {
-        const paymentRecord = await db
-          .select()
-          .from(paymentsTable)
-          .where(eq(paymentsTable.externalReference, external_reference))
-          .limit(1);
-
-        if (paymentRecord.length > 0) {
-          const listingId = paymentRecord[0].listingId;
-
-          const featuredUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-          await db
-            .update(listingsTable)
-            .set({
-              isFeatured: true,
-              featuredUntil,
-            })
-            .where(eq(listingsTable.id, listingId));
-
-          res.redirect(
-            `${FRONTEND_URL}/dashboard?payment=success&listingId=${listingId}`,
-          );
-          return;
-        }
-      }
-    }
-
-    res.redirect(`${FRONTEND_URL}/dashboard?payment=success`);
-  } catch (err) {
-    req.log.error(err, "Failed to process success");
-    res.redirect(`${FRONTEND_URL}/dashboard?payment=error`);
-  }
-});
-
-/**
- * FAILURE
- */
-router.get("/failure", async (req, res) => {
-  const { external_reference } = req.query as Record<string, string>;
-
-  if (external_reference) {
-    await db
-      .update(paymentsTable)
-      .set({ status: "rejected" })
-      .where(eq(paymentsTable.externalReference, external_reference));
-  }
-
-  res.redirect(`${FRONTEND_URL}/dashboard?payment=rejected`);
-});
-
-/**
- * PENDING
- */
-router.get("/pending", async (req, res) => {
-  const { external_reference } = req.query as Record<string, string>;
-
-  if (external_reference) {
-    await db
-      .update(paymentsTable)
-      .set({ status: "pending" })
-      .where(eq(paymentsTable.externalReference, external_reference));
-  }
-
-  res.redirect(`${FRONTEND_URL}/dashboard?payment=pending`);
-});
-
-/**
- * WEBHOOK
- */
 router.post("/webhook", async (req, res) => {
   try {
     const { type, data } = req.body;
@@ -258,10 +118,7 @@ router.post("/webhook", async (req, res) => {
 
       await db
         .update(paymentsTable)
-        .set({
-          status,
-          mpPaymentId: paymentId,
-        })
+        .set({ status, mpPaymentId: paymentId })
         .where(eq(paymentsTable.externalReference, externalReference));
 
       if (status === "approved") {
@@ -273,15 +130,11 @@ router.post("/webhook", async (req, res) => {
 
         if (paymentRecord.length > 0) {
           const listingId = paymentRecord[0].listingId;
-
           const featuredUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
           await db
             .update(listingsTable)
-            .set({
-              isFeatured: true,
-              featuredUntil,
-            })
+            .set({ isFeatured: true, featuredUntil })
             .where(eq(listingsTable.id, listingId));
         }
       }
