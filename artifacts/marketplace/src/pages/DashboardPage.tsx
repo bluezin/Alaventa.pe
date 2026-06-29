@@ -37,10 +37,13 @@ import {
   FileText,
   ChevronDown,
   ChevronUp,
+  Camera,
+  Loader2,
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Listing } from "@workspace/api-client-react";
+import { uploadImage } from "../lib/upload";
 
 interface EditState {
   listingId: number;
@@ -74,6 +77,8 @@ export default function DashboardPage() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [nameEdit, setNameEdit] = useState("");
   const [phoneEdit, setPhoneEdit] = useState("");
+  const [avatarEdit, setAvatarEdit] = useState("");
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [showPaymentOverlay, setShowPaymentOverlay] = useState(false);
 
@@ -128,14 +133,15 @@ export default function DashboardPage() {
   function startEditProfile() {
     setNameEdit(profile?.name ?? "");
     setPhoneEdit(profile?.phone ?? "");
+    setAvatarEdit(profile?.avatarUrl ?? "");
     setEditingProfile(true);
   }
 
   async function saveProfile() {
     try {
-      await updateProfile.mutateAsync({
-        data: { name: nameEdit, phone: phoneEdit },
-      });
+      const data: Record<string, string> = { name: nameEdit, phone: phoneEdit };
+      if (avatarEdit) data.avatarUrl = avatarEdit;
+      await updateProfile.mutateAsync({ data });
       qc.invalidateQueries({ queryKey: getGetMyProfileQueryKey() });
       setEditingProfile(false);
     } catch {}
@@ -302,25 +308,109 @@ export default function DashboardPage() {
           {/* Profile card */}
           <div className="space-y-4">
             <div className="bg-card rounded-xl border border-card-border p-5">
-              <div className="flex flex-col items-center mb-4">
-                {profile?.avatarUrl || clerkUser?.imageUrl ? (
-                  <img
-                    src={profile?.avatarUrl ?? clerkUser?.imageUrl}
-                    alt={profile?.name}
-                    className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
-                  />
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center border-2 border-primary/20">
-                    <User className="w-10 h-10 text-primary" />
+                <div className="flex flex-col items-center mb-4">
+                <div className="relative">
+                  <div className="relative w-20 h-20">
+                    {avatarUploading && (
+                      <div className="absolute inset-0 z-10 rounded-full bg-black/40 flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                      </div>
+                    )}
+                    {profile?.avatarUrl || clerkUser?.imageUrl ? (
+                      <img
+                        src={profile?.avatarUrl ?? clerkUser?.imageUrl}
+                        alt={profile?.name}
+                        className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center border-2 border-primary/20">
+                        <User className="w-10 h-10 text-primary" />
+                      </div>
+                    )}
                   </div>
-                )}
+                  <button
+                    type="button"
+                    disabled={avatarUploading}
+                    onClick={() => {
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.accept = "image/jpeg,image/png,image/webp";
+                      input.onchange = async () => {
+                        const file = input.files?.[0];
+                        if (!file) return;
+                        setAvatarUploading(true);
+                        try {
+                          const url = await uploadImage(file, getToken);
+                          await updateProfile.mutateAsync({
+                            data: { avatarUrl: url },
+                          });
+                          qc.invalidateQueries({ queryKey: getGetMyProfileQueryKey() });
+                          toast.success("Foto actualizada");
+                        } catch {
+                          toast.error("Error al subir imagen");
+                        } finally {
+                          setAvatarUploading(false);
+                        }
+                      };
+                      input.click();
+                    }}
+                    className="absolute -bottom-1 -right-1 w-7 h-7 bg-primary text-primary-foreground rounded-full flex items-center justify-center border-2 border-background hover:opacity-90 transition-opacity cursor-pointer"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </button>
+                </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Foto de perfil de Google/Facebook
+                  {profile?.avatarUrl ? "Foto personalizada" : "Foto de perfil de Google/Facebook"}
                 </p>
               </div>
 
               {editingProfile ? (
                 <div className="space-y-3">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="relative">
+                      {avatarEdit ? (
+                        <img
+                          src={avatarEdit}
+                          alt=""
+                          className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center border-2 border-primary/20">
+                          <User className="w-10 h-10 text-primary" />
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/jpeg,image/png,image/webp";
+                          input.onchange = async () => {
+                            const file = input.files?.[0];
+                            if (!file) return;
+                            setAvatarUploading(true);
+                            try {
+                              const url = await uploadImage(file, getToken);
+                              setAvatarEdit(url);
+                            } catch {
+                              toast.error("Error al subir imagen");
+                            } finally {
+                              setAvatarUploading(false);
+                            }
+                          };
+                          input.click();
+                        }}
+                        disabled={avatarUploading}
+                        className="absolute -bottom-1 -right-1 w-7 h-7 bg-primary text-primary-foreground rounded-full flex items-center justify-center border-2 border-background hover:opacity-90 transition-opacity"
+                      >
+                        {avatarUploading ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Camera className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
                   <div>
                     <label className="text-xs font-medium text-foreground">
                       Nombre

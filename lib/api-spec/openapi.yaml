@@ -218,6 +218,24 @@ paths:
                 items:
                   $ref: "#/components/schemas/Listing"
 
+  /users/me/accept-terms:
+    post:
+      operationId: acceptTerms
+      tags: [users]
+      summary: Accept terms and conditions
+      responses:
+        "200":
+          description: Terms accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accepted:
+                    type: boolean
+                  termsAcceptedAt:
+                    type: string
+
   /users/{userId}/listings:
     get:
       operationId: getUserListings
@@ -421,6 +439,8 @@ components:
           type: ["string", "null"]
         createdAt:
           type: string
+        termsAcceptedAt:
+          type: ["string", "null"]
         activeListingsCount:
           type: integer
 

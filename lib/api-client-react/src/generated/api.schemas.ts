@@ -96,6 +96,8 @@ export interface UserProfile {
   /** @nullable */
   avatarUrl?: string | null;
   createdAt: string;
+  /** @nullable */
+  termsAcceptedAt?: string | null;
   activeListingsCount?: number;
 }
 
@@ -123,5 +125,10 @@ search?: string;
 page?: number;
 limit?: number;
 featured?: boolean;
+};
+
+export type AcceptTerms200 = {
+  accepted?: boolean;
+  termsAcceptedAt?: string;
 };
 

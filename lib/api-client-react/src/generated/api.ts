@@ -20,6 +20,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AcceptTerms200,
   Category,
   GetListingsParams,
   HealthStatus,
@@ -866,6 +867,76 @@ export function useGetMyListings<TData = Awaited<ReturnType<typeof getMyListings
 
 
 
+
+export const getAcceptTermsUrl = () => {
+
+
+
+
+  return `/api/users/me/accept-terms`
+}
+
+/**
+ * @summary Accept terms and conditions
+ */
+export const acceptTerms = async ( options?: RequestInit): Promise<AcceptTerms200> => {
+
+  return customFetch<AcceptTerms200>(getAcceptTermsUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getAcceptTermsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptTerms>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof acceptTerms>>, TError,void, TContext> => {
+
+const mutationKey = ['acceptTerms'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acceptTerms>>, void> = () => {
+
+
+          return  acceptTerms(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcceptTermsMutationResult = NonNullable<Awaited<ReturnType<typeof acceptTerms>>>
+
+    export type AcceptTermsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Accept terms and conditions
+ */
+export const useAcceptTerms = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptTerms>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof acceptTerms>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getAcceptTermsMutationOptions(options));
+    }
 
 export const getGetUserListingsUrl = (userId: string,) => {
 

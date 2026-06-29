@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { db, usersTable, listingsTable } from "@workspace/db";
-import { eq, and, ne, count } from "drizzle-orm";
+import { db, usersTable, listingsTable, categoriesTable } from "@workspace/db";
+import { eq, and, count, ne } from "drizzle-orm";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { clerkClient } from "@clerk/express";
 import { requireAuth } from "../middlewares/auth";
 import { UpdateMyProfileBody } from "@workspace/api-zod";
+import { getR2Client, getR2Bucket, getR2PublicUrl } from "../lib/r2";
 
 const router = Router();
 
@@ -65,7 +67,23 @@ router.patch("/me", requireAuth, async (req, res) => {
     const updates: Record<string, unknown> = {};
     if (name !== undefined) updates.name = name;
     if (phone !== undefined) updates.phone = phone;
-    if (avatarUrl !== undefined) updates.avatarUrl = avatarUrl;
+    if (avatarUrl !== undefined) {
+      const [current] = await db
+        .select({ avatarUrl: usersTable.avatarUrl })
+        .from(usersTable)
+        .where(eq(usersTable.clerkId, userId))
+        .limit(1);
+      if (current?.avatarUrl) {
+        const r2PublicUrl = getR2PublicUrl();
+        if (current.avatarUrl.startsWith(r2PublicUrl)) {
+          const key = current.avatarUrl.replace(`${r2PublicUrl}/`, "");
+          getR2Client()
+            .send(new DeleteObjectCommand({ Bucket: getR2Bucket(), Key: key }))
+            .catch(() => {});
+        }
+      }
+      updates.avatarUrl = avatarUrl;
+    }
     const [updated] = await db.update(usersTable).set(updates).where(eq(usersTable.clerkId, userId)).returning();
     const [{ value: activeCount }] = await db
       .select({ value: count() })
@@ -145,7 +163,7 @@ async function enrichListings(listings: any[]) {
     const found = await db.select().from(usersTable).where(eq(usersTable.clerkId, uid)).limit(1);
     if (found.length > 0) users[uid] = found[0];
   }
-  const categories = await db.select().from((await import("@workspace/db")).categoriesTable);
+  const categories = await db.select().from(categoriesTable);
   const catMap: Record<number, string> = {};
   for (const c of categories) catMap[c.id] = c.name;
 

@@ -19,6 +19,7 @@ import ListingDetailPage from "./pages/ListingDetailPage";
 import PublishPage from "./pages/PublishPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
+import TermsModal from "./components/TermsModal";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import NotFound from "./pages/NotFound";
@@ -121,27 +122,6 @@ function SignUpPage() {
           <ArrowLeft className="w-4 h-4" />
           Volver al inicio
         </Link>
-        <p className="text-xs text-center text-muted-foreground leading-relaxed">
-          Al registrarte aceptas nuestros
-          <br />
-          <a
-            href="/terminos"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary underline hover:text-primary/80 font-medium"
-          >
-            Términos y condiciones
-          </a>{" "}
-          y{" "}
-          <a
-            href="/privacidad"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary underline hover:text-primary/80 font-medium"
-          >
-            Política de privacidad
-          </a>
-        </p>
         <SignUp
           routing="path"
           path={`${basePath}/sign-up`}
@@ -231,6 +211,7 @@ function ClerkProviderWithRoutes() {
         <TooltipProvider>
           <HelmetProvider>
             <ClerkAuthBridge />
+            <TermsModal />
             <Router />
           </HelmetProvider>
           <Toaster />

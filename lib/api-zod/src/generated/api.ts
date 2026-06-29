@@ -213,6 +213,7 @@ export const GetMyProfileResponse = zod.object({
   "phone": zod.string().nullish(),
   "avatarUrl": zod.string().nullish(),
   "createdAt": zod.string(),
+  "termsAcceptedAt": zod.string().nullish(),
   "activeListingsCount": zod.number().optional()
 })
 
@@ -234,6 +235,7 @@ export const UpdateMyProfileResponse = zod.object({
   "phone": zod.string().nullish(),
   "avatarUrl": zod.string().nullish(),
   "createdAt": zod.string(),
+  "termsAcceptedAt": zod.string().nullish(),
   "activeListingsCount": zod.number().optional()
 })
 
@@ -264,6 +266,15 @@ export const GetMyListingsResponseItem = zod.object({
   "whatsappUrl": zod.string().optional()
 })
 export const GetMyListingsResponse = zod.array(GetMyListingsResponseItem)
+
+
+/**
+ * @summary Accept terms and conditions
+ */
+export const AcceptTermsResponse = zod.object({
+  "accepted": zod.boolean().optional(),
+  "termsAcceptedAt": zod.string().optional()
+})
 
 
 /**

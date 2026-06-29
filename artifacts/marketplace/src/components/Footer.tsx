@@ -17,7 +17,7 @@ export default function Footer() {
           Términos y condiciones
         </Link>
         <a
-          href="https://wa.me/994107561"
+          href="https://wa.me/994107561?text=Hola%20necesito%20ayuda"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:text-foreground transition-colors"

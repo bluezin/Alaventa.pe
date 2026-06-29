@@ -16,5 +16,7 @@ export interface UserProfile {
   /** @nullable */
   avatarUrl?: string | null;
   createdAt: string;
+  /** @nullable */
+  termsAcceptedAt?: string | null;
   activeListingsCount?: number;
 }
