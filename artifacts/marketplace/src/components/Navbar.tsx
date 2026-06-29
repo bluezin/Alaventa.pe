@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Show, UserButton } from "@clerk/react";
-import { Search, Plus, Menu, X, ShoppingBag } from "lucide-react";
+import { Show, useUser, useClerk } from "@clerk/react";
+import { useGetMyProfile } from "@workspace/api-client-react";
+import { Search, Plus, Menu, X, User, LogOut } from "lucide-react";
 
 interface NavbarProps {
   onSearch?: (q: string) => void;
@@ -11,7 +12,12 @@ interface NavbarProps {
 export default function Navbar({ onSearch, initialSearch = "" }: NavbarProps) {
   const [search, setSearch] = useState(initialSearch);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [, navigate] = useLocation();
+  const { user: clerkUser } = useUser();
+  const { signOut } = useClerk();
+  const { data: profile } = useGetMyProfile({ query: { enabled: !!clerkUser } as any });
+  const avatarUrl = profile?.avatarUrl || clerkUser?.imageUrl;
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -97,20 +103,33 @@ export default function Navbar({ onSearch, initialSearch = "" }: NavbarProps) {
                   Publicar gratis
                 </Link>
 
-                <UserButton
-                  afterSignOutUrl="/"
-                  appearance={{
-                    elements: {
-                      userButtonPopoverActionButton__manageAccount: {
-                        display: "none",
-                      },
-                    },
-                  }}
-                />
-
-                <Link href="/dashboard" className="px-3 py-2 text-sm">
-                  Mi cuenta
-                </Link>
+                <div className="relative">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setMenuOpen(!menuOpen)}
+                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-border hover:border-primary transition-colors shrink-0 cursor-pointer"
+                    >
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-accent flex items-center justify-center">
+                          <User className="w-4 h-4 text-primary-foreground" />
+                        </div>
+                      )}
+                    </button>
+                    <Link href="/dashboard" className="text-sm">Mi cuenta</Link>
+                  </div>
+                  {menuOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-card rounded-xl shadow-lg border border-border overflow-hidden z-50">
+                        <button onClick={() => { signOut(); setMenuOpen(false); }} className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer">
+                          <LogOut className="w-4 h-4" /> Cerrar sesión
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </Show>
 
               <Show when="signed-out">
@@ -145,19 +164,17 @@ export default function Navbar({ onSearch, initialSearch = "" }: NavbarProps) {
         <div className="md:hidden border-t px-4 py-3 flex flex-col gap-2">
           <Show when="signed-in">
             <div className="flex gap-2 justify-center">
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    userButtonPopoverActionButton__manageAccount: {
-                      display: "none",
-                    },
-                  },
-                }}
-              />
-              <Link href="/dashboard" className="py-2 text-center">
-                Mi cuenta
-              </Link>
+              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-border shrink-0">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-accent flex items-center justify-center">
+                    <User className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                )}
+              </div>
+              <Link href="/dashboard" className="py-2 text-center">Mi cuenta</Link>
+              <button onClick={() => signOut()} className="py-2 text-sm text-red-600 ml-2 cursor-pointer">Cerrar sesión</button>
             </div>
 
             <Link
