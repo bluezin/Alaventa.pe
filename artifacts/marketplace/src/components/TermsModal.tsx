@@ -5,9 +5,12 @@ import {
   getGetMyProfileQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+
+const HIDE_ON_PATHS = ["/terminos", "/privacidad"];
 
 export default function TermsModal() {
+  const [location] = useLocation();
   const { isSignedIn } = useAuth();
   const { data: profile } = useGetMyProfile({
     query: { enabled: isSignedIn } as any,
@@ -18,6 +21,7 @@ export default function TermsModal() {
   if (!isSignedIn) return null;
   if (!profile) return null;
   if (profile.termsAcceptedAt) return null;
+  if (HIDE_ON_PATHS.includes(location)) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
