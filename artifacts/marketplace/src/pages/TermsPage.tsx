@@ -35,9 +35,9 @@ export default function TermsPage() {
           </h2>
           <p>
             Alaventa.pe es una plataforma de clasificados en línea que permite a
-            los usuarios publicar, buscar y contactar sobre anuncios de productos
-            y servicios. Alaventa.pe actúa únicamente como intermediario y no
-            participa en las transacciones entre usuarios.
+            los usuarios publicar, buscar y contactar sobre anuncios de
+            productos y servicios. Alaventa.pe actúa únicamente como
+            intermediario y no participa en las transacciones entre usuarios.
           </p>
 
           <h2 className="text-lg font-semibold text-foreground mt-8">
@@ -54,16 +54,23 @@ export default function TermsPage() {
             3. Responsabilidad del usuario
           </h2>
           <p>
-            Los usuarios son responsables de la veracidad, legalidad y calidad de
-            la información publicada en sus anuncios. Alaventa.pe no se hace
+            Los usuarios son responsables de la veracidad, legalidad y calidad
+            de la información publicada en sus anuncios. Alaventa.pe no se hace
             responsable por:
           </p>
           <ul className="list-disc pl-6 space-y-1">
-            <li>La calidad, veracidad o legalidad de los productos o servicios publicados.</li>
+            <li>
+              La calidad, veracidad o legalidad de los productos o servicios
+              publicados.
+            </li>
             <li>El cumplimiento de los acuerdos entre las partes.</li>
             <li>Estafas, fraudes o incumplimientos de pago o entrega.</li>
-            <li>Daños o perjuicios derivados de las transacciones entre usuarios.</li>
-            <li>La exactitud de la información proporcionada por los usuarios.</li>
+            <li>
+              Daños o perjuicios derivados de las transacciones entre usuarios.
+            </li>
+            <li>
+              La exactitud de la información proporcionada por los usuarios.
+            </li>
           </ul>
 
           <h2 className="text-lg font-semibold text-foreground mt-8">
@@ -146,13 +153,12 @@ export default function TermsPage() {
 
           <p className="text-sm mt-6">
             Ver también nuestra{" "}
-            <a href="/privacidad" className="text-primary underline hover:no-underline">
+            <a
+              href="/privacidad"
+              className="text-primary underline hover:no-underline"
+            >
               política de privacidad
-            </a>{" "}
-            y{" "}
-            <a href="/politicas" className="text-primary underline hover:no-underline">
-              políticas de comercio
-            </a>.
+            </a>
           </p>
         </div>
       </div>
