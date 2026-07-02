@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import { useAuth } from "@clerk/react";
-import { FEATURE_PRICE_LABEL } from "@workspace/api-zod";
+import { FEATURE_PRICE_LABEL, FEATURE_ORIGINAL_PRICE_LABEL } from "@workspace/api-zod";
 import { useGetListing, useGetListings } from "@workspace/api-client-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -25,6 +25,9 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import PaymentOverlay from "@/components/PaymentOverlay";
+import CommentsSection from "@/components/CommentsSection";
+import { getInitials } from "@/lib/utils";
+import SellBanner from "@/components/SellBanner";
 
 function formatPrice(price: number | null | undefined): string {
   if (price == null) return "A convenir";
@@ -32,15 +35,6 @@ function formatPrice(price: number | null | undefined): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   })}`;
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 }
 
 export default function ListingDetailPage() {
@@ -176,6 +170,8 @@ export default function ListingDetailPage() {
       <Navbar />
 
       <div className="max-w-5xl mx-auto px-4 py-5">
+        <SellBanner />
+
         {/* Back button */}
         <button
           onClick={() => window.history.back()}
@@ -293,13 +289,18 @@ export default function ListingDetailPage() {
               </p>
             </div>
 
-            {/* Related listings (mobile only) */}
+            {/* Comments (desktop) */}
+            <div className="mt-6 hidden md:block">
+              <CommentsSection listingId={id} />
+            </div>
+
+            {/* Related listings (desktop) */}
             {relatedListings.length > 0 && (
-              <div className="mt-6 md:hidden">
+              <div className="mt-6 hidden md:block">
                 <h2 className="text-lg font-bold text-foreground mb-4">
                   Anuncios relacionados
                 </h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid max-[920px]:grid-cols-1 grid-cols-2 gap-4">
                   {relatedListings.map((rel) => (
                     <ListingCard key={rel.id} listing={rel} />
                   ))}
@@ -470,12 +471,15 @@ export default function ListingDetailPage() {
                     }
                   }}
                   disabled={featureLoading}
-                  className="w-full mt-4 cursor-pointer flex items-center justify-center gap-2 py-3 rounded-xl border border-amber-400 text-amber-700 text-sm font-semibold hover:bg-amber-50 disabled:opacity-60 transition-colors mb-3"
+                  className="w-full mt-4 cursor-pointer flex flex-col items-center gap-0.5 py-3 rounded-xl border border-amber-400 text-amber-700 text-sm font-semibold hover:bg-amber-50 disabled:opacity-60 transition-colors mb-3"
                 >
-                  <Star className="w-4 h-4" />
-                  {featureLoading
-                    ? "Procesando..."
-                    : `Destacar ${FEATURE_PRICE_LABEL}`}
+                  <span className="flex items-center gap-2">
+                    <Star className="w-4 h-4" />
+                    {featureLoading ? "Procesando..." : `Destacar ${FEATURE_PRICE_LABEL}`}
+                  </span>
+                  <span className="text-xs text-muted-foreground line-through">
+                    Precio real {FEATURE_ORIGINAL_PRICE_LABEL}
+                  </span>
                 </button>
               )}
 
@@ -532,21 +536,25 @@ export default function ListingDetailPage() {
               </ul>
             </div>
 
-            {/* Related listings (desktop only) */}
-            {relatedListings.length > 0 && (
-              <div className="hidden md:block">
-                <h2 className="text-lg font-bold text-foreground mb-4">
-                  Anuncios relacionados
-                </h2>
-                <div className="grid grid-cols-2 gap-4">
-                  {relatedListings.map((rel) => (
-                    <ListingCard key={rel.id} listing={rel} />
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
+
+        {/* Comments & Related (mobile: below safety tips) */}
+        <div className="mt-6 md:hidden">
+          <CommentsSection listingId={id} />
+        </div>
+        {relatedListings.length > 0 && (
+          <div className="mt-6 md:hidden">
+            <h2 className="text-lg font-bold text-foreground mb-4">
+              Anuncios relacionados
+            </h2>
+            <div className="grid max-[570px]:grid-cols-1 grid-cols-2 gap-4">
+              {relatedListings.map((rel) => (
+                <ListingCard key={rel.id} listing={rel} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       <Footer />
     </div>

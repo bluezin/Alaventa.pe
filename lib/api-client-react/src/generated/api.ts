@@ -22,6 +22,10 @@ import type {
 import type {
   AcceptTerms200,
   Category,
+  Comment,
+  CommentInput,
+  CommentsPage,
+  GetListingCommentsParams,
   GetListingsParams,
   HealthStatus,
   Listing,
@@ -1168,4 +1172,237 @@ export function useGetExpiringListings<TData = Awaited<ReturnType<typeof getExpi
 
 
 
+
+export const getGetListingCommentsUrl = (listingId: number,
+    params?: GetListingCommentsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/listings/${listingId}/comments?${stringifiedParams}` : `/api/listings/${listingId}/comments`
+}
+
+/**
+ * @summary Get comments for a listing
+ */
+export const getListingComments = async (listingId: number,
+    params?: GetListingCommentsParams, options?: RequestInit): Promise<CommentsPage> => {
+
+  return customFetch<CommentsPage>(getGetListingCommentsUrl(listingId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetListingCommentsQueryKey = (listingId: number,
+    params?: GetListingCommentsParams,) => {
+    return [
+    `/api/listings/${listingId}/comments`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetListingCommentsQueryOptions = <TData = Awaited<ReturnType<typeof getListingComments>>, TError = ErrorType<unknown>>(listingId: number,
+    params?: GetListingCommentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getListingComments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetListingCommentsQueryKey(listingId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getListingComments>>> = ({ signal }) => getListingComments(listingId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(listingId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getListingComments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetListingCommentsQueryResult = NonNullable<Awaited<ReturnType<typeof getListingComments>>>
+export type GetListingCommentsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get comments for a listing
+ */
+
+export function useGetListingComments<TData = Awaited<ReturnType<typeof getListingComments>>, TError = ErrorType<unknown>>(
+ listingId: number,
+    params?: GetListingCommentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getListingComments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetListingCommentsQueryOptions(listingId,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateCommentUrl = (listingId: number,) => {
+
+
+
+
+  return `/api/listings/${listingId}/comments`
+}
+
+/**
+ * @summary Create a comment on a listing
+ */
+export const createComment = async (listingId: number,
+    commentInput: CommentInput, options?: RequestInit): Promise<Comment> => {
+
+  return customFetch<Comment>(getCreateCommentUrl(listingId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      commentInput,)
+  }
+);}
+
+
+
+
+export const getCreateCommentMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createComment>>, TError,{listingId: number;data: BodyType<CommentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createComment>>, TError,{listingId: number;data: BodyType<CommentInput>}, TContext> => {
+
+const mutationKey = ['createComment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createComment>>, {listingId: number;data: BodyType<CommentInput>}> = (props) => {
+          const {listingId,data} = props ?? {};
+
+          return  createComment(listingId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCommentMutationResult = NonNullable<Awaited<ReturnType<typeof createComment>>>
+    export type CreateCommentMutationBody = BodyType<CommentInput>
+    export type CreateCommentMutationError = ErrorType<void>
+
+    /**
+ * @summary Create a comment on a listing
+ */
+export const useCreateComment = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createComment>>, TError,{listingId: number;data: BodyType<CommentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createComment>>,
+        TError,
+        {listingId: number;data: BodyType<CommentInput>},
+        TContext
+      > => {
+      return useMutation(getCreateCommentMutationOptions(options));
+    }
+
+export const getDeleteCommentUrl = (listingId: number,
+    commentId: number,) => {
+
+
+
+
+  return `/api/listings/${listingId}/comments/${commentId}`
+}
+
+/**
+ * @summary Delete a comment (own comment only)
+ */
+export const deleteComment = async (listingId: number,
+    commentId: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteCommentUrl(listingId,commentId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteCommentMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{listingId: number;commentId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{listingId: number;commentId: number}, TContext> => {
+
+const mutationKey = ['deleteComment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteComment>>, {listingId: number;commentId: number}> = (props) => {
+          const {listingId,commentId} = props ?? {};
+
+          return  deleteComment(listingId,commentId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteCommentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteComment>>>
+
+    export type DeleteCommentMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete a comment (own comment only)
+ */
+export const useDeleteComment = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{listingId: number;commentId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteComment>>,
+        TError,
+        {listingId: number;commentId: number},
+        TContext
+      > => {
+      return useMutation(getDeleteCommentMutationOptions(options));
+    }
 

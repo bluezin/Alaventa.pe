@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, usersTable, listingsTable, categoriesTable } from "@workspace/db";
-import { eq, and, count, ne } from "drizzle-orm";
+import { eq, and, count, ne, desc, sql } from "drizzle-orm";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { clerkClient } from "@clerk/express";
 import { requireAuth } from "../middlewares/auth";
@@ -130,7 +130,11 @@ router.get("/me/listings", requireAuth, async (req, res) => {
       .select()
       .from(listingsTable)
       .where(and(eq(listingsTable.userId, userId), ne(listingsTable.status, "deleted")))
-      .orderBy(listingsTable.createdAt);
+      .orderBy(
+        desc(listingsTable.isFeatured),
+        sql`CASE WHEN ${listingsTable.status} = 'active' THEN 0 WHEN ${listingsTable.status} = 'expired' THEN 1 ELSE 2 END`,
+        desc(listingsTable.createdAt),
+      );
     const enriched = await enrichListings(listings);
     res.json(enriched);
   } catch (err) {

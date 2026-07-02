@@ -82,12 +82,12 @@ export const createListingBodyCurrencyDefault = `PEN`;
 export const CreateListingBody = zod.object({
   "title": zod.string().min(createListingBodyTitleMin),
   "description": zod.string().min(createListingBodyDescriptionMin),
-  "price": zod.number().nullish(),
+  "price": zod.number(),
   "currency": zod.string().default(createListingBodyCurrencyDefault),
   "categoryId": zod.number(),
   "userPhone": zod.string(),
   "imageUrls": zod.array(zod.string()).optional(),
-  "location": zod.string().optional()
+  "location": zod.string()
 })
 
 
@@ -349,5 +349,58 @@ export const GetExpiringListingsResponseItem = zod.object({
   "whatsappUrl": zod.string().optional()
 })
 export const GetExpiringListingsResponse = zod.array(GetExpiringListingsResponseItem)
+
+
+/**
+ * @summary Get comments for a listing
+ */
+export const GetListingCommentsParams = zod.object({
+  "listingId": zod.coerce.number()
+})
+
+export const GetListingCommentsQueryParams = zod.object({
+  "page": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const GetListingCommentsResponse = zod.object({
+  "comments": zod.array(zod.object({
+  "id": zod.number(),
+  "listingId": zod.number(),
+  "userId": zod.string(),
+  "userName": zod.string(),
+  "userAvatarUrl": zod.string().nullish(),
+  "content": zod.string(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number(),
+  "hasMore": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Create a comment on a listing
+ */
+export const CreateCommentParams = zod.object({
+  "listingId": zod.coerce.number()
+})
+
+
+
+
+export const CreateCommentBody = zod.object({
+  "content": zod.string().min(1)
+})
+
+
+/**
+ * @summary Delete a comment (own comment only)
+ */
+export const DeleteCommentParams = zod.object({
+  "listingId": zod.coerce.number(),
+  "commentId": zod.coerce.number()
+})
 
 

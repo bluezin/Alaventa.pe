@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearch, useLocation } from "wouter";
-import {
-  useGetListings,
-  useGetCategories,
-} from "@workspace/api-client-react";
+import { useGetListings, useGetCategories } from "@workspace/api-client-react";
 import SEOHead from "../components/SEOHead";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -11,6 +8,7 @@ import MobileQuickActions from "../components/MobileQuickActions";
 import CategorySidebar from "../components/CategorySidebar";
 import ListingCard from "../components/ListingCard";
 import AdBanner from "../components/AdBanner";
+import SellBanner from "../components/SellBanner";
 import {
   ArrowRight,
   TrendingUp,
@@ -20,7 +18,6 @@ import {
   SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
-  Megaphone,
   X,
 } from "lucide-react";
 import { IoPricetag, IoFlashSharp } from "react-icons/io5";
@@ -79,7 +76,7 @@ export default function HomePage() {
       <MobileQuickActions onOpenCategories={() => setMobileFilterOpen(true)} />
 
       {/* Hero */}
-      <section className="max-[900px]:hidden relative overflow-hidden bg-[#F7F5F4] py-7">
+      <section className="max-[920px]:hidden relative overflow-hidden bg-[#F7F5F4] py-7">
         <div className="container m-auto px-6">
           <div className="max-[1340px]:grid-cols-[580px_400px] max-[1050px]:grid-cols-[550px_300px] grid grid-cols-[700px_500px] items-center justify-center">
             {/* LEFT */}
@@ -171,32 +168,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Ad banner */}
-      <section className="max-[900px]:block hidden mx-4 mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-violet-50 to-purple-100 p-5">
-        <div className="flex items-center justify-between gap-4">
-          <div className="max-w-[60%]">
-            <h2 className="text-[20px] font-bold text-slate-900">
-              Vende más rápido
-            </h2>
-
-            <p className="mt-2 text-[14px] text-slate-600">
-              Publica tu anuncio y llega a miles de personas.
-            </p>
-
-            <button className="mt-4 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition cursor-pointer">
-              Publicar ahora
-            </button>
-          </div>
-
-          <div className="relative flex h-32 w-32 items-center justify-center">
-            <div className="absolute inset-0 rounded-full bg-violet-200/50" />
-
-            <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border-4 border-violet-400 bg-white shadow-lg">
-              <Megaphone className="h-10 w-10 text-violet-600" />
-            </div>
-          </div>
-        </div>
-      </section>
+      <div className="hidden max-[920px]:block mt-8 mx-4">
+        <SellBanner />
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-center">
         <AdBanner type="leaderboard" />
@@ -242,7 +216,7 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-4 pb-10">
         <div className="flex gap-5">
           {/* Sidebar */}
-          <aside className="max-[900px]:hidden w-56 shrink-0">
+          <aside className="max-[920px]:hidden w-56 shrink-0">
             <div className="sticky top-18 space-y-4">
               <CategorySidebar
                 categories={catList}
@@ -331,7 +305,7 @@ export default function HomePage() {
               </div>
             ) : (
               <>
-                <div className="grid max-[500px]:grid-cols-1 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                <div className="grid max-[500px]:grid-cols-1 max-[1080px]:grid-cols-2 grid-cols-3 xl:grid-cols-4 gap-3">
                   {listings.map((l) => (
                     <ListingCard key={l.id} listing={l} />
                   ))}

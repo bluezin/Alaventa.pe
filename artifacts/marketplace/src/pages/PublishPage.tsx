@@ -56,6 +56,14 @@ export default function PublishPage() {
       setError("Por favor completa todos los campos obligatorios.");
       return;
     }
+    if (!form.price || parseFloat(form.price) <= 0) {
+      setError("Ingresa un precio válido.");
+      return;
+    }
+    if (!form.location.trim()) {
+      setError("Ingresa una ubicación.");
+      return;
+    }
     if (form.phone.replace(/\D/g, "").length < 9) {
       setError("Ingresa un número de celular válido (mínimo 9 dígitos).");
       return;
@@ -72,9 +80,9 @@ export default function PublishPage() {
           description: form.description.trim(),
           categoryId: parseInt(form.categoryId),
           userPhone: form.phone.trim(),
-          price: form.price ? parseFloat(form.price) : null,
+          price: parseFloat(form.price),
           currency: "PEN",
-          location: form.location.trim() || undefined,
+          location: form.location.trim(),
           imageUrls,
         },
       });
@@ -167,19 +175,19 @@ export default function PublishPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">Precio (S/)</label>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Precio (S/) *</label>
                 <input
                   type="number"
                   value={form.price}
                   onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-                  placeholder="0.00 (dejar vacío = a convenir)"
+                  placeholder="Ej: 150"
                   min="0"
                   step="0.01"
                   className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">Ubicación</label>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Ubicación *</label>
                 <input
                   value={form.location}
                   onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}

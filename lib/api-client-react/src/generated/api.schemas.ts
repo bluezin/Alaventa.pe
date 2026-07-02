@@ -58,13 +58,12 @@ export interface ListingInput {
   title: string;
   /** @minLength 10 */
   description: string;
-  /** @nullable */
-  price?: number | null;
+  price: number;
   currency?: string;
   categoryId: number;
   userPhone: string;
   imageUrls?: string[];
-  location?: string;
+  location: string;
 }
 
 export interface ListingUpdate {
@@ -107,6 +106,30 @@ export interface UserProfileUpdate {
   avatarUrl?: string;
 }
 
+export interface Comment {
+  id: number;
+  listingId: number;
+  userId: string;
+  userName: string;
+  /** @nullable */
+  userAvatarUrl?: string | null;
+  content: string;
+  createdAt: string;
+}
+
+export interface CommentInput {
+  /** @minLength 1 */
+  content: string;
+}
+
+export interface CommentsPage {
+  comments: Comment[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore?: boolean;
+}
+
 export interface CategoryCount {
   categoryId: number;
   categoryName: string;
@@ -130,5 +153,10 @@ featured?: boolean;
 export type AcceptTerms200 = {
   accepted?: boolean;
   termsAcceptedAt?: string;
+};
+
+export type GetListingCommentsParams = {
+page?: number;
+limit?: number;
 };
 

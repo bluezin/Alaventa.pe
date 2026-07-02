@@ -11,11 +11,10 @@ export interface ListingInput {
   title: string;
   /** @minLength 10 */
   description: string;
-  /** @nullable */
-  price?: number | null;
+  price: number;
   currency?: string;
   categoryId: number;
   userPhone: string;
   imageUrls?: string[];
-  location?: string;
+  location: string;
 }

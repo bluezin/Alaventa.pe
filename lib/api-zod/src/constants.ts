@@ -1,2 +1,4 @@
-export const FEATURE_PRICE = 3;
+export const FEATURE_PRICE = 12;
 export const FEATURE_PRICE_LABEL = `S/ ${FEATURE_PRICE}`;
+export const FEATURE_ORIGINAL_PRICE = 20;
+export const FEATURE_ORIGINAL_PRICE_LABEL = `S/ ${FEATURE_ORIGINAL_PRICE}`;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth, useUser, useClerk } from "@clerk/react";
-import { FEATURE_PRICE_LABEL } from "@workspace/api-zod";
+import { FEATURE_ORIGINAL_PRICE_LABEL, FEATURE_PRICE_LABEL } from "@workspace/api-zod";
 import {
   useGetMyProfile,
   useGetMyListings,
@@ -651,7 +651,7 @@ export default function DashboardPage() {
                               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                                 <Clock className="w-3 h-3" />
                                 {expiry
-                                  ? format(expiry, "d MMM yyyy", { locale: es })
+                                  ? `Vence: ${format(expiry, "d MMM yyyy", { locale: es })}`
                                   : "—"}
                               </div>
                             </div>
@@ -698,7 +698,10 @@ export default function DashboardPage() {
                                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-amber-400 text-amber-700 text-xs font-semibold hover:bg-amber-50 disabled:opacity-60"
                                 >
                                   <Star className="w-3 h-3" /> Destacar{" "}
-                                  {FEATURE_PRICE_LABEL}
+                                  {FEATURE_PRICE_LABEL}{" "}
+                                  <span className="line-through text-muted-foreground/60">
+                                    ({FEATURE_ORIGINAL_PRICE_LABEL})
+                                  </span>
                                 </button>
                               )}
                             <button
